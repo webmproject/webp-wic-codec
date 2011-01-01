@@ -1,0 +1,5 @@
+bin/*
+ipch/*
+obj/*
+WebpWICCodec.sdf
+WebpWICCodec.suo

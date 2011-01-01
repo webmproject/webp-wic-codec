@@ -1,0 +1,21 @@
+#include <windows.h>
+
+LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
+
+1 ICON "webp.ico"
+
+1 /*1+PROCESSOR_ARCHITECTURE_INTEL*/ MSIFILE "..\bin\WebpWICCodec_x86.msi"
+10 /*1+PROCESSOR_ARCHITECTURE_AMD64*/ MSIFILE "..\bin\WebpWICCodec_x64.msi"
+
+STRINGTABLE
+LANGUAGE LANG_ENGLISH, SUBLANG_DEFAULT
+{
+  // The wrapper script failed to extract/run the MSI.
+  129 "Error while preparing setup:\n\n%1";
+}
+
+STRINGTABLE
+LANGUAGE LANG_POLISH, SUBLANG_DEFAULT
+{
+  129 "B³¹d podczas przygotowywania instalacji:\n\n%1";
+}

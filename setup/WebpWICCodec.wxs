@@ -1,0 +1,126 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Wix xmlns='http://schemas.microsoft.com/wix/2006/wi'>
+
+  <Product Name='WebP Codec 0.1' Id='CF86E4DE-603C-4453-BE72-1989F9D60F23' UpgradeCode='ABA490B1-FDF5-4444-8F92-398C98FC38EB'
+    Language='0' Codepage='65001' Version='0.1.0' Manufacturer='Google Inc'>
+
+    <Package Id='*' Keywords='Installer' Description="WebP Codec Installer"
+      InstallerVersion='200' Languages='0' Compressed='yes' SummaryCodepage='1252'
+      Platform='$(var.webp_target)' InstallScope='perMachine'/>
+
+    <Upgrade Id='ABA490B1-FDF5-4444-8F92-398C98FC38EB'>
+      <UpgradeVersion OnlyDetect='yes' Property='NEWERFOUND' Minimum='0.1.0' IncludeMinimum='no' />
+    </Upgrade>
+    <CustomAction Id='NoDowngrade' Error='A later version of [ProductName] is already installed.' />
+    <InstallExecuteSequence>
+      <Custom Action='NoDowngrade' After='FindRelatedProducts'>NEWERFOUND</Custom>
+    </InstallExecuteSequence>
+
+    <Condition Message="You need to be an administrator to install this product.">
+        Privileged
+    </Condition>
+
+    <Media Id='1' Cabinet='Sample.cab' EmbedCab='yes' DiskPrompt='File #1' />
+    <Property Id='DiskPrompt' Value="WebP codec installation file [1]" />
+
+    <Icon Id="webp.ico" SourceFile="webp.ico"/>
+    <Property Id="ARPPRODUCTICON" Value="webp.ico" />
+
+    <Property Id='WindowsPhotoDir' Value='Windows Photo Viewer'/>
+    <SetProperty Id="WindowsPhotoDir" Before="FindRelatedProducts" Value="Windows Photo Gallery">
+       VersionNT = 600
+    </SetProperty>
+
+    <Directory Id='TARGETDIR' Name='SourceDir'>
+      <Directory Id='ProgramFilesFolder' Name='PFiles'>
+        <Directory Id='INSTALLDIR' Name='WebP Codec'>
+          <Directory Id='INSTALLSAMPLESDIR' Name='Example Files'>
+            <Component Id='SampleWebP' Guid='08999C2E-0530-4F05-A808-9E531E26C734'>
+              <File Id='SampleFileWebP' Name='Sample WebP Image.webp' DiskId='1' Source='..\example\image.webp' KeyPath='yes'/>
+            </Component>
+            <Component Id='SampleJpeg' Guid='C2B8DE81-A43C-46A9-A66D-C359453F1969'>
+              <File Id='SampleFileJpeg' Name='Sample Jpeg Image.jpeg' DiskId='1' Source='..\example\image.jpeg' KeyPath='yes'/>
+            </Component>
+          </Directory>
+
+          <Component Id='Codec32' Guid='6FE8934C-364D-4605-89EE-F0232AA88C13'>
+              <File Id='Codec32DLL' Name='WebpWICCodec.dll' DiskId='1' Source='..\bin\win32\Release\WebpWICCodec.dll' KeyPath='yes' SelfRegCost='1'/>
+          </Component>
+
+          <Component Id='WebPAssoc' Guid='47366188-2254-42B1-B04A-DB4D377431C1'>
+            <Condition>VersionNT &gt;= 600</Condition>
+            <ProgId Id="webpfile" Description="WebP Image" />
+            <RegistryValue Root="HKCR" Key=".webp" Value="webpfile" Type="string" Action="write" />
+            <RegistryValue Root="HKCR" Key=".webp" Name="ContentType" Value="image/webp" Type="string" Action="write" />
+            <RegistryValue Root="HKCR" Key=".webp" Name="PerceivedType" Value="image" Type="string" Action="write" />
+            <RegistryValue Root="HKCR" Key=".webp\OpenWithList\PhotoViewer.dll" Value="" Type="string" Action="write" />
+            <RegistryValue Root="HKCR" Key=".webp\OpenWithProgids" Name="webpfile" Value="" Type="string" Action="write" />
+            <RegistryValue Root="HKCR" Key=".webp\ShellEx\ContextMenuHandlers\ShellImagePreview" Value="{FFE2A43C-56B9-4bf5-9A79-CC6D4285608A}" Type="string" Action="write" />
+            <RegistryValue Root="HKCR" Key=".webp\ShellEx\{e357fccd-a995-4576-b01f-234630154e96}" Value="{C7657C4A-9F68-40fa-A4DF-96BC08EB3551}" Type="string" Action="write" />
+<?if $(var.webp_target) = "x64"?>
+            <RegistryValue Root="HKCR" Key="webpfile" Name="FriendlyTypeName" Value="@[#Codec64DLL],-1025" Type="string" Action="write" />
+<?else?>
+            <RegistryValue Root="HKCR" Key="webpfile" Name="FriendlyTypeName" Value="@[#Codec32DLL],-1025" Type="string" Action="write" />
+<?endif?>
+            <RegistryValue Root="HKCR" Key="webpfile\DefaultIcon" Value="%SystemRoot%\System32\imageres.dll,-72" Type="expandable" Action="write" />
+            <RegistryValue Root="HKCR" Key="webpfile\shell\open\command" Value="%SystemRoot%\System32\rundll32.exe &quot;%ProgramFiles%\[WindowsPhotoDir]\PhotoViewer.dll&quot;, ImageView_Fullscreen %1" Type="expandable" Action="write" />
+            <RegistryValue Root="HKCR" Key="webpfile\shell\open" Name="MuiVerb" Value="@%ProgramFiles%\[WindowsPhotoDir]\photoviewer.dll,-3043" Type="expandable" Action="write" />
+            <RegistryValue Root="HKCR" Key="webpfile\shell\printto\command" Value="%SystemRoot%\System32\rundll32.exe %SystemRoot%\System32\shimgvw.dll, ImageView_PrintTo /pt %1 %2 %3 %4" Type="expandable" Action="write" />
+          </Component>
+        </Directory>
+      </Directory>
+
+<?if $(var.webp_target) = "x64"?>
+      <Directory Id='ProgramFiles64Folder' Name='PFiles64'>
+        <Directory Id='INSTALLDIR64' Name='WebP Codec'>
+          <Component Id='Codec64' Guid='5716BBE0-2ACC-4329-877E-C040EB68682C' Win64='yes'>
+            <File Id='Codec64DLL' Name='WebpWICCodec.dll' DiskId='1' Source='..\bin\x64\Release\WebpWICCodec.dll' KeyPath='yes' SelfRegCost='1'/>
+          </Component>
+        </Directory>
+      </Directory>
+<?endif?>
+    </Directory>
+
+    <Feature Id='Complete' Title='Complete Installation' Description='The complete package' Display='expand' Level='1' AllowAdvertise='no'>
+<?if $(var.webp_target) = "x64"?>
+      <Feature Id='codec_x86_x64' Title='WebP Codec (64-bit and 32-bit)'
+          Description='Codec libraries that allow to display WebP images in applications using the Windows Imaging Component (both 32-bit and 64-bit)' Level='1'
+          AllowAdvertise='no' ConfigurableDirectory='INSTALLDIR64'>
+        <ComponentRef Id='Codec64'/>
+        <ComponentRef Id='Codec32'/>
+        <ComponentRef Id='WebPAssoc'/>
+      </Feature>
+<?else?>
+      <Feature Id='codec_x86' Title='WebP Codec (32-bit)'
+          Description='Codec library that allows to display WebP images in applications using the Windows Imaging Component (32-bit)' Level='1'
+          AllowAdvertise='no' ConfigurableDirectory='INSTALLDIR'>
+        <ComponentRef Id='Codec32'/>
+        <ComponentRef Id='WebPAssoc'/>
+      </Feature>
+<?endif?>
+      <Feature Id='samples' Title='Sample Images' Description='A sample image in Jpeg and WebP' Level='1' AllowAdvertise='no'
+         ConfigurableDirectory='INSTALLSAMPLESDIR'>
+        <ComponentRef Id='SampleWebP'/>
+        <ComponentRef Id='SampleJpeg'/>
+      </Feature>
+    </Feature>
+
+    <SetProperty Id='WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT' Value='View example files' After='ProgressDlg' Sequence='ui'>
+      ?SampleWebP&gt;2 or $SampleWebP&gt;2
+    </SetProperty>
+    <Property Id="WixShellExecTarget" Value="[INSTALLSAMPLESDIR]" />
+    <CustomAction Id="LaunchApplication" BinaryKey="WixCA" DllEntry="WixShellExec" Impersonate="yes" />
+
+    <WixVariable Id="WixUILicenseRtf" Value="License.rtf"/>
+    <WixVariable Id="WixUIBannerBmp" Value="bannrbmp.bmp"/> 
+    <UI>
+      <UIRef Id="WixUI_Mondo" />
+      <Publish Dialog="ExitDialog"
+          Control="Finish" 
+          Event="DoAction" 
+          Value="LaunchApplication">WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 and NOT Installed</Publish>
+    </UI>
+    <UIRef Id="WixUI_ErrorProgressText" />
+
+  </Product>
+</Wix>

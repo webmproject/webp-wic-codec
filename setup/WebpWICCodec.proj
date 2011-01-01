@@ -1,0 +1,150 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.0\Wix.targets</WixTargetsPath>
+        <WixTasksPath Condition=" '$(WixTasksPath)' == ''">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.0\WixTasks.dll</WixTasksPath>
+        <IntermediateOutputPath>..\obj\setup\</IntermediateOutputPath>
+        <OutputPath>..\bin\</OutputPath>
+        <OutputName>WebpWICCodec</OutputName>
+        <Target32Path>$(OutputPath)$(OutputName)_x86.msi</Target32Path>
+        <Target64Path>$(OutputPath)$(OutputName)_x64.msi</Target64Path>
+        <TargetExePath>$(OutputPath)$(OutputName)Setup.exe</TargetExePath>
+    </PropertyGroup>
+
+    <UsingTask TaskName="Candle" AssemblyFile="$(WixTasksPath)" />
+    <UsingTask TaskName="Light" AssemblyFile="$(WixTasksPath)" />
+    <UsingTask TaskName="ReadRegistry" AssemblyFile="$(WixTasksPath)" />
+    <UsingTask TaskName="RC" AssemblyName="Microsoft.Build.CppTasks.Common, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"/>
+    <UsingTask TaskName="CL" AssemblyName="Microsoft.Build.CppTasks.Win32, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <UsingTask TaskName="Link" AssemblyName="Microsoft.Build.CppTasks.Win32, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+
+    <ItemGroup>
+        <WixExtension Include="$(WixToolPath)WixUiExtension.dll" />
+        <WixExtension Include="$(WixToolPath)WixUtilExtension.dll" />
+        <WixCompile Include="WebpWICCodec.wxs" />
+        <RCCompile Include="wrapper.rc"/>
+        <ClCompile Include="wrapper.cc"/>
+    </ItemGroup>
+
+
+    <!-- Copied for wix.targets. Sets $(WixExtDir) and $(WixToolPath) -->
+    <Target Name="_SetDefaultPathValues">
+        <ReadRegistry
+            Hive="LocalMachine"
+            Key="SOFTWARE\Microsoft\Windows Installer XML\3.0"
+            Name="InstallRoot"
+            FailIfMissing="false"
+            Condition=" '$(WixExtDir)' == '' ">
+            <Output TaskParameter="Value" PropertyName="WixExtDir" />
+        </ReadRegistry>
+
+        <ReadRegistry
+            Hive="LocalMachine"
+            Key="SOFTWARE\Microsoft\Windows Installer XML\3.0"
+            Name="InstallRoot"
+            FailIfMissing="false"
+            Condition=" '$(WixToolPath)' == '' ">
+            <Output TaskParameter="Value" PropertyName="WixToolPath" />
+        </ReadRegistry>
+
+        <!-- If we didn't find the first registry paths, assume we're in a 64bit process. -->
+        <!-- WiX tools are 32bit EXEs, so run them out-of-proc when MSBuild is 64bit. -->
+        <CreateProperty Value="true" Condition=" '$(WixToolPath)' == '' ">
+          <Output TaskParameter="Value" PropertyName="RunWixToolsOutOfProc" />
+        </CreateProperty>
+        <ReadRegistry
+            Hive="LocalMachine"
+            Key="SOFTWARE\Wow6432Node\Microsoft\Windows Installer XML\3.0"
+            Name="InstallRoot"
+            FailIfMissing="false"
+            Condition=" '$(WixExtDir)' == '' ">
+            <Output TaskParameter="Value" PropertyName="WixExtDir" />
+        </ReadRegistry>
+        <ReadRegistry
+            Hive="LocalMachine"
+            Key="SOFTWARE\Wow6432Node\Microsoft\Windows Installer XML\3.0"
+            Name="InstallRoot"
+            FailIfMissing="false"
+            Condition=" '$(WixToolPath)' == '' ">
+            <Output TaskParameter="Value" PropertyName="WixToolPath" />
+        </ReadRegistry>    
+        <CreateProperty Value="$(WixToolPath)" Condition=" '$(WixExtDir)' == '' ">
+            <Output TaskParameter="Value" PropertyName="WixExtDir" />
+        </CreateProperty>
+    </Target>
+    <!-- END copied from wix.targets -->
+
+    <Target Name="Prepare" DependsOnTargets="_SetDefaultPathValues">
+        <MakeDir Directories="$(IntermediateOutputPath);$(IntermediateOutputPath)\x64;$(IntermediateOutputPath)\x86"/>
+    </Target>
+    <Target Name="Compile64" Inputs="@(WixCompile);@(WixExtension)" Outputs="$(IntermediateOutputPath)x64\%(WixCompile.Filename).wixobj"
+        DependsOnTargets="Prepare">
+        <Candle
+            SourceFiles="@(WixCompile)"
+            AdditionalOptions="$(CompilerAdditionalOptions)" 
+            DefineConstants="webp_target=x64"
+            Extensions="@(WixExtension)"
+            ToolPath="$(WixToolPath)"
+            SuppressSpecificWarnings="1077"
+            NoLogo="True"
+            OutputFile="$(IntermediateOutputPath)x64\%(WixCompile.Filename).wixobj">
+
+            <Output TaskParameter="OutputFile" ItemName="WixCompile64ObjOutput" />
+        </Candle>
+    </Target>
+    <Target Name="Link64" Inputs="@(WixCompile64ObjOutput)" Outputs="$(Target64Path)" DependsOnTargets="Compile64">
+        <Light
+            ObjectFiles="@(WixCompile64ObjOutput)"
+            ExtensionDirectory="$(WixExtDir)"
+            Extensions="@(WixExtension)"
+            OutputFile="$(Target64Path)"
+            ToolPath="$(WixToolPath)"
+            SuppressSpecificWarnings="1076"
+            NoLogo="True"/>
+    </Target>
+
+    <Target Name="Compile32" Inputs="@(WixCompile);@(WixExtension)" Outputs="$(IntermediateOutputPath)x86\%(WixCompile.Filename).wixobj"
+        DependsOnTargets="Prepare">
+        <Candle
+            SourceFiles="@(WixCompile)"
+            AdditionalOptions="$(CompilerAdditionalOptions)" 
+            DefineConstants="webp_target=x86"
+            Extensions="@(WixExtension)"
+            ToolPath="$(WixToolPath)"
+            SuppressSpecificWarnings="1077"
+            NoLogo="True"
+            OutputFile="$(IntermediateOutputPath)x86\%(WixCompile.Filename).wixobj">
+
+            <Output TaskParameter="OutputFile" ItemName="WixCompile32ObjOutput" />
+        </Candle>
+    </Target>
+    <Target Name="Link32" Inputs="@(WixCompile32ObjOutput)" Outputs="$(Target32Path)" DependsOnTargets="Compile32">
+        <Light
+            ObjectFiles="@(WixCompile32ObjOutput)"
+            ExtensionDirectory="$(WixExtDir)"
+            Extensions="@(WixExtension)"
+            OutputFile="$(Target32Path)"
+            ToolPath="$(WixToolPath)"
+            SuppressSpecificWarnings="1076"
+            NoLogo="True"/>
+    </Target>
+
+    <Target Name="Resources" Inputs="@(RCCompile);$Target32Path;$Target64Path" Outputs="$(IntermediateOutputPath)x86\%(RCCompile.Filename).res"
+        DependsOnTargets="Link32;Link64">
+        <RC Source="@(RCCompile)" ResourceOutputFileName="$(IntermediateOutputPath)x86\%(RCCompile.Filename).res">
+        </RC>
+    </Target>
+
+    <Target Name="CompileWrapper" Inputs="@(ClCompile)" Outputs="$(IntermediateOutputPath)x86\%(RCCompile.Filename).obj"
+        DependsOnTargets="Resources">
+        <CL Sources="@(ClCompile)" ObjectFileName="$(IntermediateOutputPath)x86\%(RCCompile.Filename).obj" Optimization="MaxSpeed"
+            RuntimeLibrary="MultiThreaded">
+        </CL>
+    </Target>
+
+    <Target Name="LinkWrapper" Inputs="$(IntermediateOutputPath)x86\%(RCCompile.Filename).res;$(IntermediateOutputPath)x86\%(RCCompile.Filename).obj"
+        Outputs="$TargetExePath" DependsOnTargets="Resources;CompileWrapper">
+        <Link Sources="$(IntermediateOutputPath)x86\%(RCCompile.Filename).obj;$(IntermediateOutputPath)x86\%(RCCompile.Filename).res"
+              AdditionalDependencies="user32.lib;msi.lib" DataExecutionPrevention="True" OutputFile="$(TargetExePath)"/>
+    </Target>
+    <Target Name="Build" DependsOnTargets="LinkWrapper"></Target>
+</Project>

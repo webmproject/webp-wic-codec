@@ -1,0 +1,57 @@
+[version]
+Signature="$CHICAGO$"
+
+[DefaultInstall]
+AddReg=Classes.Reg
+
+[DefaultUninstall]
+DelReg=Classes.Reg
+
+[PervistaInstall]
+AddReg=Classes.Reg
+
+[PervistaUninstall]
+DelReg=Classes.Reg
+
+[WithAssocInstall]
+AddReg=Classes.Reg, Assoc.Reg
+
+[WithAssocUninstall]
+DelReg=Classes.Reg, Assoc.Reg
+
+[Classes.Reg]
+HKCR,"CLSID\{7ED96837-96F0-4812-B211-F13C24117ED3}\Instance\{C747A836-4884-47B8-8544-002C41BD63D2}"
+HKCR,"CLSID\{7ED96837-96F0-4812-B211-F13C24117ED3}\Instance\{C747A836-4884-47B8-8544-002C41BD63D2}","CLSID",,"{C747A836-4884-47B8-8544-002C41BD63D2}"
+HKCR,"CLSID\{7ED96837-96F0-4812-B211-F13C24117ED3}\Instance\{C747A836-4884-47B8-8544-002C41BD63D2}","FriendlyName",,"WebP Decoder"
+HKCR,"CLSID\{C747A836-4884-47B8-8544-002C41BD63D2}"
+HKCR,"CLSID\{C747A836-4884-47B8-8544-002C41BD63D2}",,,"WebP Decoder"
+HKCR,"CLSID\{C747A836-4884-47B8-8544-002C41BD63D2}","ContainerFormat",,"{1F122879-EBA0-4670-98C5-CF29F3B98711}"
+HKCR,"CLSID\{C747A836-4884-47B8-8544-002C41BD63D2}","FileExtensions",,".webp"
+HKCR,"CLSID\{C747A836-4884-47B8-8544-002C41BD63D2}","FriendlyName",,"WebP Decoder"  ; @<path>,-resid is not supported here
+HKCR,"CLSID\{C747A836-4884-47B8-8544-002C41BD63D2}","MimeTypes",,"image/webp"
+HKCR,"CLSID\{C747A836-4884-47B8-8544-002C41BD63D2}","VendorGUID",,"{D4837961-2609-4B94-A9CB-A42A209AA021}"
+HKCR,"CLSID\{C747A836-4884-47B8-8544-002C41BD63D2}\Formats\{6FDDC324-4E03-4BFE-B185-3D77768DC90C}",,0x10,
+HKCR,"CLSID\{C747A836-4884-47B8-8544-002C41BD63D2}\InProcServer32",,,"%_MOD_PATH%"
+HKCR,"CLSID\{C747A836-4884-47B8-8544-002C41BD63D2}\InProcServer32","ThreadingModel",,"Both"
+HKCR,"CLSID\{C747A836-4884-47B8-8544-002C41BD63D2}\Patterns\0","Length",0x10001,12
+HKCR,"CLSID\{C747A836-4884-47B8-8544-002C41BD63D2}\Patterns\0","Mask",1,ff,ff,ff,ff,00,00,00,00,ff,ff,ff,ff
+HKCR,"CLSID\{C747A836-4884-47B8-8544-002C41BD63D2}\Patterns\0","Pattern",1,52,49,46,46,00,00,00,00,57,45,42,50
+HKCR,"CLSID\{C747A836-4884-47B8-8544-002C41BD63D2}\Patterns\0","Position",0x10001,0
+
+; This is now done by the MSI installer and is not part of a default self-registration.
+[Assoc.Reg]
+HKCR,".webp"
+HKCR,".webp",,,"webpfile"
+HKCR,".webp","ContentType",,"image/webp"
+HKCR,".webp","PerceivedType",,"image"
+HKCR,".webp\OpenWithList\PhotoViewer.dll",,0x10,
+HKCR,".webp\OpenWithProgids","webpfile",,""
+HKCR,".webp\ShellEx\{e357fccd-a995-4576-b01f-234630154e96}",,,"{C7657C4A-9F68-40fa-A4DF-96BC08EB3551}"
+HKCR,".webp\ShellEx\ContextMenuHandlers\ShellImagePreview",,,"{FFE2A43C-56B9-4bf5-9A79-CC6D4285608A}"
+HKCR,"webpfile"
+HKCR,"webpfile",,,"WebP Image"
+HKCR,"webpfile","FriendlyTypeName",,"@%_MOD_PATH%,-1025"
+HKCR,"webpfile\DefaultIcon",,0x20000,"%SystemRoot%\System32\imageres.dll,-72"
+HKCR,"webpfile\shell\open","MuiVerb",0x20000,"@%PROGRAMFILES%\%PhotoDir%\photoviewer.dll,-3043"
+HKCR,"webpfile\shell\open\command",,0x20000,"%SystemRoot%\System32\rundll32.exe ""%ProgramFiles%\%PhotoDir%\PhotoViewer.dll"", ImageView_Fullscreen %1"
+HKCR,"webpfile\shell\printto\command",,0x20000,"%SystemRoot%\System32\rundll32.exe "%SystemRoot%\System32\shimgvw.dll", ImageView_PrintTo /pt "%1" "%2" "%3" "%4"

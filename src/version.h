@@ -16,8 +16,8 @@
 #define PRODUCT_VERSION_MINOR_STR "10"
 
 // The build id defaults to 0, but other can be specified as an MSBuild
-// parameter with /p:CommandLineRCDefines='VERSION_BUILD=1;VERSION_BUILD_STR="1"'.
-// Such builds won't be marked as private.
+// parameter with /p:CommandLineRCDefines="VERSION_BUILD=1;VERSION_BUILD_STR=\"1\"".
+// in src\ or /p:WebpBuildId=1 in setup\. Such builds won't be marked as private.
 #ifndef VERSION_BUILD
 #define FILE_VERSION_BUILD 0
 #define FILE_VERSION_BUILD_STR "0"

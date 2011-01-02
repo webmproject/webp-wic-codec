@@ -27,8 +27,8 @@ version_h.writelines([
     '#define PRODUCT_VERSION_MINOR_STR "%d"\n' % VERSION_MINOR,
     '\n',
     '// The build id defaults to 0, but other can be specified as an MSBuild\n'
-    '// parameter with /p:CommandLineRCDefines=\'VERSION_BUILD=1;VERSION_BUILD_STR="1"\'.\n'
-    '// Such builds won\'t be marked as private.\n'
+    '// parameter with /p:CommandLineRCDefines="VERSION_BUILD=1;VERSION_BUILD_STR=\\"1\\"".\n'
+    '// in src\ or /p:WebpBuildId=1 in setup\. Such builds won\'t be marked as private.\n'
     '#ifndef VERSION_BUILD\n'
     '#define FILE_VERSION_BUILD 0\n'
     '#define FILE_VERSION_BUILD_STR "0"\n'

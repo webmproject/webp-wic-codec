@@ -2,6 +2,7 @@
     <PropertyGroup>
         <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.0\Wix.targets</WixTargetsPath>
         <WixTasksPath Condition=" '$(WixTasksPath)' == ''">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.0\WixTasks.dll</WixTasksPath>
+        <WebpBuildId Condition=" '$(WebpBuildId)' == ''">0</WebpBuildId>
         <IntermediateOutputPath>..\obj\setup\</IntermediateOutputPath>
         <OutputPath>..\bin\</OutputPath>
         <OutputName>WebpWICCodec</OutputName>
@@ -81,7 +82,7 @@
         <Candle
             SourceFiles="@(WixCompile)"
             AdditionalOptions="$(CompilerAdditionalOptions)" 
-            DefineConstants="webp_target=x64"
+            DefineConstants="webp_target=x64;webp_build_id=$(WebpBuildId)"
             Extensions="@(WixExtension)"
             ToolPath="$(WixToolPath)"
             SuppressSpecificWarnings="1077"
@@ -107,7 +108,7 @@
         <Candle
             SourceFiles="@(WixCompile)"
             AdditionalOptions="$(CompilerAdditionalOptions)" 
-            DefineConstants="webp_target=x86"
+            DefineConstants="webp_target=x86;webp_build_id=$(WebpBuildId)"
             Extensions="@(WixExtension)"
             ToolPath="$(WixToolPath)"
             SuppressSpecificWarnings="1077"
@@ -130,7 +131,8 @@
 
     <Target Name="Resources" Inputs="@(RCCompile);$Target32Path;$Target64Path" Outputs="$(IntermediateOutputPath)x86\%(RCCompile.Filename).res"
         DependsOnTargets="Link32;Link64">
-        <RC Source="@(RCCompile)" ResourceOutputFileName="$(IntermediateOutputPath)x86\%(RCCompile.Filename).res">
+        <RC Source="@(RCCompile)" ResourceOutputFileName="$(IntermediateOutputPath)x86\%(RCCompile.Filename).res"
+            PreprocessorDefinitions="VERSION_BUILD=$(WebpBuildId);VERSION_BUILD_STR=&quot;$(WebpBuildId)&quot;">
         </RC>
     </Target>
 

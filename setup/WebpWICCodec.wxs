@@ -1,15 +1,18 @@
 <?xml version='1.0' encoding='utf-8'?>
 <Wix xmlns='http://schemas.microsoft.com/wix/2006/wi'>
 
-  <Product Name='WebP Codec 0.1' Id='CF86E4DE-603C-4453-BE72-1989F9D60F23' UpgradeCode='ABA490B1-FDF5-4444-8F92-398C98FC38EB'
-    Language='0' Codepage='65001' Version='0.1.0' Manufacturer='Google Inc'>
+  <?include version.wxs ?>
+
+  <Product Name='WebP Codec $(var.version_major).$(var.version_minor)' Id='CF86E4DE-603C-4453-BE72-1989F9D60F23'
+    UpgradeCode='ABA490B1-FDF5-4444-8F92-398C98FC38EB' Language='0' Codepage='65001'
+    Version='$(var.version_major).$(var.version_minor).0' Manufacturer='Google Inc'>
 
     <Package Id='*' Keywords='Installer' Description="WebP Codec Installer"
       InstallerVersion='200' Languages='0' Compressed='yes' SummaryCodepage='1252'
       Platform='$(var.webp_target)' InstallScope='perMachine'/>
 
     <Upgrade Id='ABA490B1-FDF5-4444-8F92-398C98FC38EB'>
-      <UpgradeVersion OnlyDetect='yes' Property='NEWERFOUND' Minimum='0.1.0' IncludeMinimum='no' />
+      <UpgradeVersion OnlyDetect='yes' Property='NEWERFOUND' Minimum='$(var.version_major).$(var.version_minor).0' IncludeMinimum='no' />
     </Upgrade>
     <CustomAction Id='NoDowngrade' Error='A later version of [ProductName] is already installed.' />
     <InstallExecuteSequence>

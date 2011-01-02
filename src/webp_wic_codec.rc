@@ -11,6 +11,7 @@
 
 #include <windows.h>
 #include "resids.h"
+#include "version.h"
 
 STRINGTABLE
 LANGUAGE LANG_ENGLISH, SUBLANG_DEFAULT
@@ -34,16 +35,11 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 
 REGINST REGINST autoreg.inf
 
-#define VERSION_MAJOR 0
-#define VERSION_MAJOR_STR "0"
-#define VERSION_MINOR 10
-#define VERSION_MINOR_STR "10"
-
 LANGUAGE LANG_ENGLISH, SUBLANG_DEFAULT
 
 1 VERSIONINFO
-FILEVERSION VERSION_MAJOR,VERSION_MINOR,0,0
-PRODUCTVERSION VERSION_MAJOR,VERSION_MINOR,0,0
+FILEVERSION FILE_VERSION_MAJOR,FILE_VERSION_MINOR,0,0
+PRODUCTVERSION PRODUCT_VERSION_MAJOR,PRODUCT_VERSION_MINOR,0,0
 FILEOS VOS_NT_WINDOWS32
 FILETYPE VFT_DLL
 FILESUBTYPE VFT2_UNKNOWN
@@ -54,12 +50,12 @@ BEGIN
     BEGIN
       VALUE "CompanyName",      "Google Inc"
       VALUE "FileDescription",  "WebP codec for Windows Imaging Component"
-      VALUE "FileVersion",      VERSION_MAJOR_STR "." VERSION_MINOR_STR ".0.0"
+      VALUE "FileVersion",      FILE_VERSION_MAJOR_STR "." FILE_VERSION_MINOR_STR ".0.0"
       VALUE "InternalName",     "WebpWICCodec.dll"
       VALUE "LegalCopyright",   "Copyright (c) 2010, Google Inc. All rights reserved."
       VALUE "OriginalFilename", "WebpWICCodec.dll"
       VALUE "ProductName",      "WebP Codec"
-      VALUE "ProductVersion",   VERSION_MAJOR_STR "." VERSION_MINOR_STR ".0.0"
+      VALUE "ProductVersion",   PRODUCT_VERSION_MAJOR_STR "." PRODUCT_VERSION_MINOR_STR ".0.0"
     END
   END
   BLOCK "VarFileInfo"

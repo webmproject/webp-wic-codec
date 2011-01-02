@@ -1,0 +1,6 @@
+<!-- File generated automatically - do not edit. -->
+<!-- Edit ..\setversion.py instead. -->
+<Include>
+  <?define version_major="0"?>
+  <?define version_minor="10"?>
+</Include>

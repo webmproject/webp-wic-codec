@@ -171,6 +171,7 @@
     <ClInclude Include="resids.h" />
     <ClInclude Include="utils.h" />
     <ClInclude Include="uuid.h" />
+    <ClInclude Include="version.h" />
     <ClInclude Include="webpimg.h" />
   </ItemGroup>
   <ItemGroup>
@@ -178,7 +179,9 @@
     <None Include="webp_wic_codec.def" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="webp_wic_codec.rc" />
+    <ResourceCompile Include="webp_wic_codec.rc">
+      <PreprocessorDefinitions>$(CommandLineRCDefines)</PreprocessorDefinitions>
+    </ResourceCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -26,6 +26,29 @@ version_h.writelines([
     '#define PRODUCT_VERSION_MAJOR_STR "%d"\n' % VERSION_MAJOR,
     '#define PRODUCT_VERSION_MINOR_STR "%d"\n' % VERSION_MINOR,
     '\n',
+    '// The build id defaults to 0, but other can be specified as an MSBuild\n'
+    '// parameter with /p:CommandLineRCDefines=\'VERSION_BUILD=1;VERSION_BUILD_STR="1"\'.\n'
+    '// Such builds won\'t be marked as private.\n'
+    '#ifndef VERSION_BUILD\n'
+    '#define FILE_VERSION_BUILD 0\n'
+    '#define FILE_VERSION_BUILD_STR "0"\n'
+    '#define PRODUCT_VERSION_BUILD 0\n'
+    '#define PRODUCT_VERSION_BUILD_STR "0"\n'
+    '#define VER_PRIVATE VS_FF_PRIVATEBUILD\n'
+    '#else\n'
+    '#define FILE_VERSION_BUILD VERSION_BUILD\n'
+    '#define FILE_VERSION_BUILD_STR VERSION_BUILD_STR\n'
+    '#define PRODUCT_VERSION_BUILD VERSION_BUILD\n'
+    '#define PRODUCT_VERSION_BUILD_STR VERSION_BUILD_STR\n'
+    '#define VER_PRIVATE 0\n'
+    '#endif\n'
+    '\n'
+    '#ifdef _DEBUG\n'
+    '#define VER_DEBUG VS_FF_DEBUG\n'
+    '#else\n'
+    '#define VER_DEBUG 0\n'
+    '#endif\n'
+    '\n'
     '#endif  /* WEBPWICCODEC_VERSION_H */\n',
     ])
 version_h.close()

@@ -6,6 +6,8 @@
  - Additional IP Rights Grant:  http://www.webmproject.org/license/additional/
  *===========================================================================*/
 
+/* A modified file from webpconv+leptonica package */
+
 /*
  * Encoding/Decoding of WebP still image compression format.
  *
@@ -30,8 +32,6 @@
  *
  * 6. AdjustColorspaceBack:
  */
-
-//#define inline  /* unknown to MSVC++ in C mode */
 
 #include "webpimg.h"
 

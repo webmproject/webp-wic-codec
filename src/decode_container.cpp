@@ -1,3 +1,14 @@
+// Copyright 2010 Google Inc.
+//
+// This code is licensed under the same terms as WebM:
+//  Software License Agreement:  http://www.webmproject.org/license/software/
+//  Additional IP Rights Grant:  http://www.webmproject.org/license/additional/
+// -----------------------------------------------------------------------------
+//
+// Interface to the RIFF container and creating a VP8 frame object.
+//
+// Author: Mikolaj Zalewski (mikolajz@google.com)
+
 #include <windows.h>
 #include "decode_container.h"
 

@@ -6,6 +6,8 @@
  - Additional IP Rights Grant:  http://www.webmproject.org/license/additional/
  *===========================================================================*/
 
+/* A modified version of the file from the webp+leptonica package*/
+
 /*
  * Encoding/Decoding of WebP still image compression format.
  *

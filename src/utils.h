@@ -1,3 +1,14 @@
+// Copyright 2010 Google Inc.
+//
+// This code is licensed under the same terms as WebM:
+//  Software License Agreement:  http://www.webmproject.org/license/software/
+//  Additional IP Rights Grant:  http://www.webmproject.org/license/additional/
+// -----------------------------------------------------------------------------
+//
+// Miscelanous utility functions. All implementation is in-line - no *.cc file.
+//
+// Author: Mikolaj Zalewski (mikolajz@google.com)
+
 #ifndef WEBPWICCODEC_UTILS_H
 #define WEBPWICCODEC_UTILS_H
 

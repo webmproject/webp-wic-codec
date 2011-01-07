@@ -50,15 +50,15 @@ BEGIN
   BEGIN
     BLOCK "040904B0"
     BEGIN
-      VALUE "CompanyName",      "Google Inc"
+      VALUE "CompanyName",      PRODUCT_COMPANY
       VALUE "FileDescription",  "WebP codec for Windows Imaging Component"
       VALUE "FileVersion",      FILE_VERSION_MAJOR_STR "." FILE_VERSION_MINOR_STR "." FILE_VERSION_BUILD_STR ".0"
       VALUE "InternalName",     "WebpWICCodec.dll"
       VALUE "LegalCopyright",   "Copyright (c) 2010, Google Inc. All rights reserved."
       VALUE "OriginalFilename", "WebpWICCodec.dll"
-      VALUE "ProductName",      "WebP Codec"
+      VALUE "ProductName",      PRODUCT_NAME
       VALUE "ProductVersion",   PRODUCT_VERSION_MAJOR_STR "." PRODUCT_VERSION_MINOR_STR "." PRODUCT_VERSION_BUILD_STR ".0"
-#if PRIVATE_BUILD
+#if VER_PRIVATE
       VALUE "PrivateBuild",     "(private build)"
 #endif
     END

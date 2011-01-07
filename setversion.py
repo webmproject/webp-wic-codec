@@ -1,11 +1,34 @@
 #!/usr/bin/python
 #
 # Script to generate version information files for both C++ and MSI.
+#
+# The build id and company name can be changed using command line flags, what is
+# used during official builds.
 
+import getopt
 import os
+import sys
 
 VERSION_MAJOR=0
 VERSION_MINOR=10
+PRODUCT_NAME='WebP WIC Codec for Windows'
+# These defaults can be changed using command line flags.
+# Note that only builds made by Google should use Google as company name.
+DEFAULT_COMPANY='Private open source build'
+DEFAULT_BUILD=0
+
+opts, args = getopt.gnu_getopt(sys.argv[1:], "", ["build=", "company="])
+assert len(args) == 0
+opts = dict(opts)
+if opts.has_key('--build'):
+    build = int(opts['--build'])
+else:
+    build = DEFAULT_BUILD
+    
+if opts.has_key('--company'):
+    company = opts['--company']
+else:
+    company = DEFAULT_COMPANY
 
 version_h = file('src\\version.h', 'w')
 version_h.writelines([
@@ -17,6 +40,10 @@ version_h.writelines([
     '#ifndef WEBPWICCODEC_VERSION_H\n',
     '#define WEBPWICCODEC_VERSION_H\n',
     '\n',
+    '\n',
+    '#define PRODUCT_NAME "%s"\n' % PRODUCT_NAME,
+    '#define PRODUCT_COMPANY "%s"\n' % company,
+    '\n',
     '#define FILE_VERSION_MAJOR %d\n' % VERSION_MAJOR,
     '#define FILE_VERSION_MINOR %d\n' % VERSION_MINOR,
     '#define FILE_VERSION_MAJOR_STR "%d"\n' % VERSION_MAJOR,
@@ -26,21 +53,16 @@ version_h.writelines([
     '#define PRODUCT_VERSION_MAJOR_STR "%d"\n' % VERSION_MAJOR,
     '#define PRODUCT_VERSION_MINOR_STR "%d"\n' % VERSION_MINOR,
     '\n',
-    '// The build id defaults to 0, but other can be specified as an MSBuild\n'
-    '// parameter with /p:CommandLineRCDefines="VERSION_BUILD=1;VERSION_BUILD_STR=\\"1\\"".\n'
-    '// in src\ or /p:WebpBuildId=1 in setup\. Such builds won\'t be marked as private.\n'
-    '#ifndef VERSION_BUILD\n'
-    '#define FILE_VERSION_BUILD 0\n'
-    '#define FILE_VERSION_BUILD_STR "0"\n'
-    '#define PRODUCT_VERSION_BUILD 0\n'
-    '#define PRODUCT_VERSION_BUILD_STR "0"\n'
-    '#define VER_PRIVATE VS_FF_PRIVATEBUILD\n'
-    '#else\n'
-    '#define FILE_VERSION_BUILD VERSION_BUILD\n'
-    '#define FILE_VERSION_BUILD_STR VERSION_BUILD_STR\n'
-    '#define PRODUCT_VERSION_BUILD VERSION_BUILD\n'
-    '#define PRODUCT_VERSION_BUILD_STR VERSION_BUILD_STR\n'
+    '#define FILE_VERSION_BUILD %d\n' % build,
+    '#define FILE_VERSION_BUILD_STR "%d"\n' % build,
+    '#define PRODUCT_VERSION_BUILD %d\n' % build,
+    '#define PRODUCT_VERSION_BUILD_STR "%d"\n' % build,
+    '\n'
+    '// Builds with a set build id are considered non-private.\n'
+    '#if FILE_VERSION_BUILD\n'
     '#define VER_PRIVATE 0\n'
+    '#else\n'
+    '#define VER_PRIVATE VS_FF_PRIVATEBUILD\n'
     '#endif\n'
     '\n'
     '#ifdef _DEBUG\n'
@@ -60,6 +82,9 @@ version_wxs.writelines([
     '<Include>\n',
     '  <?define version_major="%d"?>\n' % VERSION_MAJOR,
     '  <?define version_minor="%d"?>\n' % VERSION_MINOR,
+    '  <?define version_build="%d"?>\n' % build,
+    '  <?define product_name="%s"?>\n' % PRODUCT_NAME,
+    '  <?define company="%s"?>\n' % company,
     '</Include>\n',
     ])
 version_wxs.close()

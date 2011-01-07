@@ -3,4 +3,7 @@
 <Include>
   <?define version_major="0"?>
   <?define version_minor="10"?>
+  <?define version_build="0"?>
+  <?define product_name="WebP WIC Codec for Windows"?>
+  <?define company="Private open source build"?>
 </Include>

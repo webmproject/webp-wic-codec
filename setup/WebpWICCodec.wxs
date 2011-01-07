@@ -3,16 +3,16 @@
 
   <?include version.wxs ?>
 
-  <Product Name='WebP Codec $(var.version_major).$(var.version_minor)' Id='CF86E4DE-603C-4453-BE72-1989F9D60F23'
+  <Product Name='$(var.product_name) $(var.version_major).$(var.version_minor)' Id='CF86E4DE-603C-4453-BE72-1989F9D60F23'
     UpgradeCode='ABA490B1-FDF5-4444-8F92-398C98FC38EB' Language='0' Codepage='65001'
-    Version='$(var.version_major).$(var.version_minor).$(var.webp_build_id)' Manufacturer='Google Inc'>
+    Version='$(var.version_major).$(var.version_minor).$(var.version_build)' Manufacturer='$(var.company)'>
 
-    <Package Id='*' Keywords='Installer' Description="WebP Codec Installer"
+    <Package Id='*' Keywords='Installer' Description="$(var.product_name) Installer"
       InstallerVersion='200' Languages='0' Compressed='yes' SummaryCodepage='1252'
       Platform='$(var.webp_target)' InstallScope='perMachine'/>
 
     <Upgrade Id='ABA490B1-FDF5-4444-8F92-398C98FC38EB'>
-      <UpgradeVersion OnlyDetect='yes' Property='NEWERFOUND' Minimum='$(var.version_major).$(var.version_minor).$(var.webp_build_id)' IncludeMinimum='no' />
+      <UpgradeVersion OnlyDetect='yes' Property='NEWERFOUND' Minimum='$(var.version_major).$(var.version_minor).$(var.version_build)' IncludeMinimum='no' />
     </Upgrade>
     <CustomAction Id='NoDowngrade' Error='A later version of [ProductName] is already installed.' />
     <InstallExecuteSequence>
@@ -24,7 +24,7 @@
     </Condition>
 
     <Media Id='1' Cabinet='Sample.cab' EmbedCab='yes' DiskPrompt='File #1' />
-    <Property Id='DiskPrompt' Value="WebP codec installation file [1]" />
+    <Property Id='DiskPrompt' Value="$(var.product_name) installation file [1]" />
 
     <Icon Id="webp.ico" SourceFile="webp.ico"/>
     <Property Id="ARPPRODUCTICON" Value="webp.ico" />

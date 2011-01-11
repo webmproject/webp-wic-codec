@@ -7,7 +7,7 @@
 #define WEBPWICCODEC_VERSION_H
 
 
-#define PRODUCT_NAME "WebP WIC Codec for Windows"
+#define PRODUCT_NAME "WebP Codec for Windows"
 #define PRODUCT_COMPANY "Private open source build"
 
 #define FILE_VERSION_MAJOR 0

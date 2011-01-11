@@ -145,6 +145,8 @@
         Outputs="$TargetExePath" DependsOnTargets="Resources;CompileWrapper">
         <Link Sources="$(IntermediateOutputPath)x86\%(RCCompile.Filename).obj;$(IntermediateOutputPath)x86\%(RCCompile.Filename).res"
               AdditionalDependencies="user32.lib;msi.lib" DataExecutionPrevention="True" OutputFile="$(TargetExePath)"/>
+<!-- TODO: It seems this requires running MT to embed the manifest inside the *.exe - the liner itself can't do it. -->
+<!--              EnableUAC="true" UACExecutionLevel="requireAdministrator" GenerateManifest="True" -->
     </Target>
     <Target Name="Build" DependsOnTargets="LinkWrapper"></Target>
 </Project>

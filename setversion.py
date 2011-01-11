@@ -11,7 +11,7 @@ import sys
 
 VERSION_MAJOR=0
 VERSION_MINOR=10
-PRODUCT_NAME='WebP WIC Codec for Windows'
+PRODUCT_NAME='WebP Codec for Windows'
 # These defaults can be changed using command line flags.
 # Note that only builds made by Google should use Google as company name.
 DEFAULT_COMPANY='Private open source build'

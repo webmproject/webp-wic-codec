@@ -42,7 +42,7 @@ HKCR,"CLSID\{C747A836-4884-47B8-8544-002C41BD63D2}\Patterns\0","Position",0x1000
 [Assoc.Reg]
 HKCR,".webp"
 HKCR,".webp",,,"webpfile"
-HKCR,".webp","ContentType",,"image/webp"
+HKCR,".webp","Content Type",,"image/webp"
 HKCR,".webp","PerceivedType",,"image"
 HKCR,".webp\OpenWithList\PhotoViewer.dll",,0x10,
 HKCR,".webp\OpenWithProgids","webpfile",,""

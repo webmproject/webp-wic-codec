@@ -54,7 +54,7 @@
             <Condition>VersionNT &gt;= 600</Condition>
             <ProgId Id="webpfile" Description="WebP Image" />
             <RegistryValue Root="HKCR" Key=".webp" Value="webpfile" Type="string" Action="write" />
-            <RegistryValue Root="HKCR" Key=".webp" Name="ContentType" Value="image/webp" Type="string" Action="write" />
+            <RegistryValue Root="HKCR" Key=".webp" Name="Content Type" Value="image/webp" Type="string" Action="write" />
             <RegistryValue Root="HKCR" Key=".webp" Name="PerceivedType" Value="image" Type="string" Action="write" />
             <RegistryValue Root="HKCR" Key=".webp\OpenWithList\PhotoViewer.dll" Value="" Type="string" Action="write" />
             <RegistryValue Root="HKCR" Key=".webp\OpenWithProgids" Name="webpfile" Value="" Type="string" Action="write" />

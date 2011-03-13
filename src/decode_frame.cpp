@@ -16,8 +16,12 @@
 #include <cstdlib>
 #include <memory>
 
+#ifdef USE_LIBVPX
 #include "vpx/vpx_decoder.h"
 #include "vpx/vp8dx.h"
+#else
+#include "webp/decode.h"
+#endif
 #include "webpimg.h"
 
 const int kBytesPerPixel = 3;
@@ -78,12 +82,25 @@ HRESULT DecodeFrame::CreateFromVP8Stream(BYTE* vp8_bitstream, DWORD stream_size,
   // e.g., the photo viewers load the image row by row, with multiple calls to
   // CopyPixels. Thus, for simplicity, we do all expect for YUV -> RGB
   // conversion here.
+  // TODO: Do the decoding on the first call to CopyPixels to be OK with the
+  // letter of the documentation. Maybe we could do progressive decoding if the
+  // callers request the image in the top to bottom order?
+#ifdef USE_LIBVPX
   WebPResult decode_result =
     VPXDecode(vp8_bitstream, stream_size, &pImage->Y,
               &pImage->U, &pImage->V, &pImage->width,
               &pImage->height);
+  pImage->yStride = pImage->width;
+  pImage->uvStride = ((pImage->yStride + 1) >> 1);
+  bool decodedImage = (decode_result != webp_success);
+#else
+  pImage->Y = WebPDecodeYUV(vp8_bitstream, stream_size, &pImage->width,
+      &pImage->height, &pImage->U, &pImage->V, &pImage->yStride,
+      &pImage->uvStride);
+  bool decodedImage = (pImage->Y != NULL);
+#endif
 
-  if (decode_result != webp_success || pImage->width < 0 || pImage->height < 0) {
+  if (!decodedImage) {
     // We don't know what was the problem, but we assume it's a problem with
     // the content.
     // TODO: get better error codes.
@@ -91,6 +108,14 @@ HRESULT DecodeFrame::CreateFromVP8Stream(BYTE* vp8_bitstream, DWORD stream_size,
     // even for problems in the bitstream.
     TRACE("Couldn't decode VP8 stream.\n");
     return WINCODEC_ERR_BADIMAGE;
+  }
+
+  // Sanity checks:
+  if (pImage->width < 0 || pImage->height < 0
+      || pImage->uvStride < (pImage->width+1)/2
+      || pImage->yStride < pImage->width) {
+    TRACE("Invalid sizes from decoder!\n");
+    return E_FAIL;
   }
 
   output.reset(new (std::nothrow) DecodeFrame(pImage.release()));
@@ -171,8 +196,8 @@ HRESULT DecodeFrame::CopyPixels(const WICRect *prc, UINT cbStride, UINT cbBuffer
   if (rect.Width == 0 || rect.Height == 0)
     return S_OK;
 
-  int y_stride = image_->width;
-  int uv_stride = ((y_stride + 1) >> 1);
+  int y_stride = image_->yStride;
+  int uv_stride = image_->uvStride;
   /* note that the U, V upsampling in height is happening here as the U, V
    * buffers sent to successive odd-even pair of lines is same.
    */

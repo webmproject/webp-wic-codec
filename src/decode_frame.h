@@ -25,6 +25,8 @@ struct YUVImage {
   BYTE* V;
   int width;
   int height;
+  int yStride;
+  int uvStride;
 };
 
 // The single frame available in a WebP image file in a decoded form.

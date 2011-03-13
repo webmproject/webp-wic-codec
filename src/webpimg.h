@@ -42,15 +42,18 @@ extern "C" {
 
 typedef unsigned char uint8;
 typedef unsigned int uint32;
+#ifdef USE_LIBVPX
 typedef enum WebPResultType {
   webp_success = 0,
   webp_failure = -1
 } WebPResult;
+#endif
 
 void WebpInitTables();
 void WebpToRGB(int y, int u, int v, uint32* const dst);
 void WebpToRGB24(int y, int u, int v, uint8* const dst);
 
+#ifdef USE_LIBVPX
 /* Takes an array of bytes (string) corresponding to the WebP
  * encoded image and generates output in the YUV format with
  * the color components U, V subsampled to 1/2 resolution along
@@ -192,5 +195,6 @@ WebPResult WebPGetInfo(const uint8* data,
 /*#ifdef __cplusplus
 }
 #endif  /* __cplusplus */
+#endif  /* USE_LIBVPX */
 
 #endif  /* THIRD_PARTY_VP8_VP8IMG_H_ */

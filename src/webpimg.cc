@@ -35,6 +35,7 @@
 
 #include "webpimg.h"
 
+#ifdef USE_LIBVPX
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -45,6 +46,12 @@
 #include "vpx/vp8dx.h"
 #include "vpx/vpx_encoder.h"
 #include "vpx/vp8cx.h"
+#else
+typedef unsigned char uint8_t;
+typedef signed char int8_t;
+typedef short int int16_t;
+typedef int int32_t;
+#endif
 
 /*---------------------------------------------------------------------*
  *                              color conversions                      *
@@ -165,6 +172,7 @@ void WebpToRGB24(int y, int u, int v, uint8* const dst) {
 //  *dst = (r << RED_SHIFT) | (g << GREEN_SHIFT) | (b << BLUE_SHIFT);
 }
 
+#ifdef USE_LIBVPX
 static inline uint32 get_le32(const uint8* const data) {
   return data[0] | (data[1] << 8) | (data[2] << 16) | (data[3] << 24);
 }
@@ -794,3 +802,5 @@ WebPResult WebPGetInfo(const uint8* data,
 
   return webp_success;
 }
+
+#endif  // USE_LIBVPX

@@ -3,7 +3,7 @@
 
   <?include version.wxs ?>
 
-  <Product Name='$(var.product_name) $(var.version_major).$(var.version_minor)' Id='CF86E4DE-603C-4453-BE72-1989F9D60F23'
+  <Product Name='$(var.product_name) $(var.version_major).$(var.version_minor)' Id='*'
     UpgradeCode='ABA490B1-FDF5-4444-8F92-398C98FC38EB' Language='0' Codepage='65001'
     Version='$(var.version_major).$(var.version_minor).$(var.version_build)' Manufacturer='$(var.company)'>
 
@@ -13,10 +13,15 @@
 
     <Upgrade Id='ABA490B1-FDF5-4444-8F92-398C98FC38EB'>
       <UpgradeVersion OnlyDetect='yes' Property='NEWERFOUND' Minimum='$(var.version_major).$(var.version_minor).$(var.version_build)' IncludeMinimum='no' />
+      <UpgradeVersion OnlyDetect='no' Property='PREVIOUSFOUND'
+          Minimum='0.10.0'
+          Maximum='$(var.version_major).$(var.version_minor).$(var.version_build)'
+          IncludeMaximum='no' />
     </Upgrade>
     <CustomAction Id='NoDowngrade' Error='A later version of [ProductName] is already installed.' />
     <InstallExecuteSequence>
       <Custom Action='NoDowngrade' After='FindRelatedProducts'>NEWERFOUND</Custom>
+      <RemoveExistingProducts After="InstallFinalize"/>
     </InstallExecuteSequence>
 
     <Condition Message="You need to be an administrator to install this product.">

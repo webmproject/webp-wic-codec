@@ -4,7 +4,7 @@
         <WixTasksPath Condition=" '$(WixTasksPath)' == ''">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.0\WixTasks.dll</WixTasksPath>
         <IntermediateOutputPath>..\obj\setup\</IntermediateOutputPath>
         <OutputPath>..\bin\</OutputPath>
-        <OutputName>WebpWICCodec</OutputName>
+        <OutputName>WebpCodec</OutputName>
         <Target32Path>$(OutputPath)$(OutputName)_x86.msi</Target32Path>
         <Target64Path>$(OutputPath)$(OutputName)_x64.msi</Target64Path>
         <TargetExePath>$(OutputPath)$(OutputName)Setup.exe</TargetExePath>

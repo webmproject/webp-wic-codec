@@ -52,7 +52,7 @@ HRESULT ParseHeader(IStream* pIStream, DWORD* container_size, DWORD* vp8_size) {
   *container_size = get_le32(&header[4]);
   *vp8_size = get_le32(&header[16]);
   // Check that VP8 data fits in the container.
-  if (*vp8_size + 12 > *container_size) {
+  if (*container_size < 12 || *vp8_size > *container_size - 12) {
     TRACE2("Wrong sizes (container: %d, vp8: %d)\n", container_size, vp8_size);
     return WINCODEC_ERR_BADHEADER;
   }

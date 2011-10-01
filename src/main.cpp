@@ -19,6 +19,7 @@
 #include <new>
 #include <advpub.h>
 #include <shlobj.h>
+#include <strsafe.h>
 #include <unknwn.h>
 #include "decode_container.h"
 #include "utils.h"
@@ -29,6 +30,8 @@
 // Logging in debug mode.
 #ifdef _DEBUG
 
+#include <Shlwapi.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -37,6 +40,9 @@ static CRITICAL_SECTION debug_file_section;
 static FILE* debug_file;
 
 void MAIN_debug_printf(const char* prefix, const char* func, const char* fmt, ...) {
+  if (!debug_file)
+    return;
+
   va_list ap;
   va_start(ap, fmt);
   EnterCriticalSection(&debug_file_section);
@@ -49,12 +55,18 @@ void MAIN_debug_printf(const char* prefix, const char* func, const char* fmt, ..
 }
 
 static void init_debug() {
-  char filename[200];
-  time_t timestamp;
-  time(&timestamp);
-  wsprintfA(filename, "D:\\temp\\codec-out-%08x-%08x.txt", (LONGLONG)timestamp,
-      GetCurrentProcessId());
-  debug_file = fopen(filename, "w");
+  WCHAR path[MAX_PATH];
+  DWORD path_size = MAX_PATH;
+  DWORD err;
+  if (!(err = SHRegGetValueW(HKEY_LOCAL_MACHINE, L"Software\\Google\\WebP Codec",
+                  L"DebugPath", SRRF_RT_REG_SZ, NULL, path, &path_size))) {
+    WCHAR filename[MAX_PATH];
+    time_t timestamp;
+    time(&timestamp);
+    StringCchPrintfW(filename, MAX_PATH, L"%s\\webp-codec-debug-%010Ld-%08x.txt",
+        path, (LONGLONG)timestamp, GetCurrentProcessId());
+    debug_file = _wfopen(filename, L"w");
+  }
   InitializeCriticalSection(&debug_file_section);
 }
 
@@ -164,36 +176,45 @@ HRESULT MyClassFactory::LockServer(BOOL fLock)
   return S_OK;
 }
 
-typedef HRESULT (WINAPI *RegInstallFunc)(HMODULE hm, LPCWSTR pszSection, const STRTABLEW* pstTable);
+typedef HRESULT (WINAPI *RegInstallFuncA)(HMODULE hm, LPCSTR pszSection, const STRTABLEA* pstTable);
 typedef void (STDAPICALLTYPE *SHChangeNotifyFunc)(LONG wEventId, UINT uFlags, LPCVOID dwItem1, LPCVOID dwItem2);
 
 
 static HRESULT RegisterServer(BOOL fInstall) {
   // Manual loading of advpack not to load it when DLL used in normal opertion.
   HMODULE hAdvPack = LoadLibraryExW(L"advpack.dll", NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
-  if (hAdvPack == NULL)
+  if (hAdvPack == NULL) {
+    TRACE("Couldn't load advpack.dll\n");
     return E_UNEXPECTED;
-  RegInstallFunc pRegInstall = (RegInstallFunc)GetProcAddress(hAdvPack, "RegInstallW");
-  if (!pRegInstall)
-    return E_UNEXPECTED;
+  }
 
-  STRENTRY entries[1] = {
-    {L"PhotoDir", L"Windows Photo Viewer"}
+  // Note: RegInstallA/W not available on Windows XP with MSIE6.
+  // Using ANSI version doesn't matter, as the "unicodeness" of the _MOD_PATH
+  // depends only on the "unicodeness" of the *.inf file, while other
+  // substitutions are ASCII.
+  RegInstallFuncA pRegInstallA = (RegInstallFuncA)GetProcAddress(hAdvPack, "RegInstall");
+  if (!pRegInstallA) {
+    TRACE("Couldn't find RegInstall in advpack.dll\n");
+    return E_UNEXPECTED;
+  }
+
+  STRENTRYA entries[1] = {
+    {"PhotoDir", "Windows Photo Viewer"}
   };
-  STRTABLE strings;
+  STRTABLEA strings;
   strings.cEntries = sizeof(entries)/sizeof(entries[0]);
   strings.pse = entries;
   if (LOWORD(GetVersion()) == 0x0006)
-    entries[0].pszValue = L"Windows Photo Gallery";
+    entries[0].pszValue = "Windows Photo Gallery";
 
-  LPCWSTR section;
+  LPCSTR section;
   if (LOBYTE(GetVersion()) < 6) {
-    section = (fInstall ? L"PrevistaInstall" : L"PrevistaUninstall");
+    section = (fInstall ? "PrevistaInstall" : "PrevistaUninstall");
   } else {
-    section = (fInstall ? L"DefaultInstall" : L"DefaultUninstall");
+    section = (fInstall ? "DefaultInstall" : "DefaultUninstall");
   }
   TRACE3("Registering install=%d (using %ws) v=%x\n", fInstall, section, GetVersion());
-  if (FAILED(pRegInstall(MAIN_hSelf, section, &strings)))
+  if (FAILED(pRegInstallA(MAIN_hSelf, section, &strings)))
     return E_UNEXPECTED;
 
   // Invalidate caches.

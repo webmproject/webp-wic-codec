@@ -24,6 +24,10 @@
 #endif
 #include "webpimg.h"
 
+#ifdef WEBP_DEBUG_LOGGING
+#include "stopwatch.h"
+#endif  // WEBP_DEBUG_LOGGING
+
 const int kBytesPerPixel = 3;
 
 YUVImage::~YUVImage() {
@@ -77,6 +81,11 @@ HRESULT DecodeFrame::CreateFromVP8Stream(BYTE* vp8_bitstream, DWORD stream_size,
   if (pImage.get() == NULL)
     return E_OUTOFMEMORY;
 
+#ifdef WEBP_DEBUG_LOGGING
+  Stopwatch stopwatch;
+  StopwatchReadAndReset(&stopwatch);
+#endif  // WEBP_DEBUG_LOGGING
+
   // Note: according to the documentation, the actual decoding should happen
   // in CopyPixels. However, this would need to be implemented efficiently, as
   // e.g., the photo viewers load the image row by row, with multiple calls to
@@ -92,13 +101,18 @@ HRESULT DecodeFrame::CreateFromVP8Stream(BYTE* vp8_bitstream, DWORD stream_size,
               &pImage->height);
   pImage->yStride = pImage->width;
   pImage->uvStride = ((pImage->yStride + 1) >> 1);
-  bool decodedImage = (decode_result != webp_success);
+  bool decodedImage = (decode_result == webp_success);
 #else
   pImage->Y = WebPDecodeYUV(vp8_bitstream, stream_size, &pImage->width,
       &pImage->height, &pImage->U, &pImage->V, &pImage->yStride,
       &pImage->uvStride);
   bool decodedImage = (pImage->Y != NULL);
 #endif
+
+#ifdef WEBP_DEBUG_LOGGING
+  double time = StopwatchReadAndReset(&stopwatch);
+  TRACE1("Decode (VP8 -> YUV) time: %f\n", time);
+#endif  // WEBP_DEBUG_LOGGING
 
   if (!decodedImage) {
     // We don't know what was the problem, but we assume it's a problem with

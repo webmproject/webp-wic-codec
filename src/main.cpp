@@ -28,7 +28,7 @@
 #include "uuid.h"
 
 // Logging in debug mode.
-#ifdef _DEBUG
+#ifdef WEBP_DEBUG_LOGGING
 
 #include <Shlwapi.h>
 
@@ -54,7 +54,7 @@ void MAIN_debug_printf(const char* prefix, const char* func, const char* fmt, ..
   va_end(ap);
 }
 
-static void init_debug() {
+static void init_logging() {
   WCHAR path[MAX_PATH];
   DWORD path_size = MAX_PATH;
   DWORD err;
@@ -265,8 +265,8 @@ BOOL WINAPI DllMain(__in  HINSTANCE hinstDLL, __in  DWORD fdwReason, __in  LPVOI
     DisableThreadLibraryCalls(hinstDLL);
     MAIN_hSelf = hinstDLL;
     WebpInitTables();
-#ifdef _DEBUG
-    init_debug();
+#ifdef WEBP_DEBUG_LOGGING
+    init_logging();
 #endif
   }
   TRACE1("(%d)\n", fdwReason);

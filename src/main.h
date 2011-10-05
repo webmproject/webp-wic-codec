@@ -14,6 +14,10 @@
 #define WEBPWICCODEC_MAIN_H
 
 #ifdef _DEBUG
+#define WEBP_DEBUG_LOGGING
+#endif  // DEBUG
+
+#ifdef WEBP_DEBUG_LOGGING
 // debug functions
 void MAIN_debug_printf(const char* prefix, const char* func, const char* fmt, ...);
 #define TRACE(fmt) MAIN_debug_printf("trace", __FUNCTION__, fmt)

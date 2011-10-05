@@ -37,7 +37,7 @@
 #include <time.h>
 
 static CRITICAL_SECTION debug_file_section;
-static FILE* debug_file;
+static FILE* debug_file = NULL;
 
 void MAIN_debug_printf(const char* prefix, const char* func, const char* fmt, ...) {
   if (!debug_file)
@@ -55,19 +55,22 @@ void MAIN_debug_printf(const char* prefix, const char* func, const char* fmt, ..
 }
 
 static void init_logging() {
+  InitializeCriticalSection(&debug_file_section);
+
   WCHAR path[MAX_PATH];
   DWORD path_size = MAX_PATH;
   DWORD err;
-  if (!(err = SHRegGetValueW(HKEY_LOCAL_MACHINE, L"Software\\Google\\WebP Codec",
-                  L"DebugPath", SRRF_RT_REG_SZ, NULL, path, &path_size))) {
-    WCHAR filename[MAX_PATH];
-    time_t timestamp;
-    time(&timestamp);
-    StringCchPrintfW(filename, MAX_PATH, L"%s\\webp-codec-debug-%010Ld-%08x.txt",
-        path, (LONGLONG)timestamp, GetCurrentProcessId());
-    debug_file = _wfopen(filename, L"w");
+  if ((err = SHRegGetValueW(HKEY_LOCAL_MACHINE, L"Software\\Google\\WebP Codec",
+                  L"DebugPath", SRRF_RT_REG_SZ, NULL, path, &path_size)) != ERROR_SUCCESS) {
+    StringCchCopyW(path, MAX_PATH, L"C:\\DebugOut");
   }
-  InitializeCriticalSection(&debug_file_section);
+
+  WCHAR filename[MAX_PATH];
+  time_t timestamp;
+  time(&timestamp);
+  StringCchPrintfW(filename, MAX_PATH, L"%s\\webp-codec-debug-%010Ld-%08x.txt",
+      path, (LONGLONG)timestamp, GetCurrentProcessId());
+  debug_file = _wfopen(filename, L"w");
 }
 
 // Returns a pointer to a string representation of a GUID. The results are
@@ -78,7 +81,8 @@ char *debugstr_guid(REFGUID guid)
   static char guidbuf[32][128];
   static int pos = 0;
   pos %= 32;
-  sprintf(guidbuf[pos], "{%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x}",
+  StringCchPrintfA(guidbuf[pos], 128,
+          "{%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x}",
 	  guid.Data1, guid.Data2, guid.Data3, guid.Data4[0], guid.Data4[1],
 	  guid.Data4[2], guid.Data4[3], guid.Data4[4], guid.Data4[5],
 	  guid.Data4[6], guid.Data4[7]);

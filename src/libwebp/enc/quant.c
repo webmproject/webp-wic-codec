@@ -33,7 +33,7 @@
 extern "C" {
 #endif
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 static inline int clip(int v, int m, int M) {
   return v < m ? m : v > M ? M : v;
@@ -100,8 +100,6 @@ static const uint16_t kAcTable2[128] = {
   385, 393, 401, 409, 416, 424, 432, 440
 };
 
-#define QFIX 17
-#define BIAS(b)  ((b) << (QFIX - 8))
 static const uint16_t kCoeffThresh[16] = {
   0,  10, 20, 30,
   10, 20, 30, 30,
@@ -134,7 +132,7 @@ static const uint8_t kFreqSharpening[16] = {
   90, 90, 90, 90
 };
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Initialize quantization parameters in VP8Matrix
 
 // Returns the average quantizer
@@ -194,7 +192,7 @@ static void SetupMatrices(VP8Encoder* enc) {
   }
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Initialize filtering parameters
 
 // Very small filter-strength values have close to no visual effect. So we can
@@ -216,7 +214,7 @@ static void SetupFilterStrength(VP8Encoder* const enc) {
   enc->filter_hdr_.sharpness_ = enc->config_->filter_sharpness;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 // Note: if you change the values below, remember that the max range
 // allowed by the syntax for DQ_UV is [-16,16].
@@ -288,7 +286,7 @@ void VP8SetSegmentParams(VP8Encoder* const enc, float quality) {
   SetupFilterStrength(enc);   // initialize segments' filtering, eventually
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Form the predictions in cache
 
 // Must be ordered using {DC_PRED, TM_PRED, V_PRED, H_PRED} as index
@@ -318,7 +316,7 @@ void VP8MakeIntra4Preds(const VP8EncIterator* const it) {
   VP8EncPredLuma4(it->yuv_p_, it->i4_top_);
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Quantize
 
 // Layout:
@@ -343,7 +341,7 @@ const int VP8Scan[16 + 4 + 4] = {
   8 + 0 * BPS,  12 + 0 * BPS, 8 + 4 * BPS, 12 + 4 * BPS     // V
 };
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Distortion measurement
 
 static const uint16_t kWeightY[16] = {
@@ -386,39 +384,8 @@ static void AddScore(VP8ModeScore* const dst, const VP8ModeScore* const src) {
   dst->score += src->score;
 }
 
-//-----------------------------------------------------------------------------
-// Performs simple and trellis-optimized quantization.
-
-// Fun fact: this is the _only_ line where we're actually being lossy and
-// discarding bits.
-static int DIV(int n, int iQ, int B) {
-  return (n * iQ + B) >> QFIX;
-}
-
-// Simple quantization
-static int QuantizeBlock(int16_t in[16], int16_t out[16],
-                         int n, const VP8Matrix* const mtx) {
-  int last = -1;
-  for (; n < 16; ++n) {
-    const int j = kZigzag[n];
-    const int sign = (in[j] < 0);
-    int coeff = (sign ? -in[j] : in[j]) + mtx->sharpen_[j];
-    if (coeff > 2047) coeff = 2047;
-    if (coeff > mtx->zthresh_[j]) {
-      const int Q = mtx->q_[j];
-      const int iQ = mtx->iq_[j];
-      const int B = mtx->bias_[j];
-      out[n] = DIV(coeff, iQ, B);
-      if (sign) out[n] = -out[n];
-      in[j] = out[n] * Q;
-      if (out[n]) last = n;
-    } else {
-      out[n] = 0;
-      in[j] = 0;
-    }
-  }
-  return (last >= 0);
-}
+//------------------------------------------------------------------------------
+// Performs trellis-optimized quantization.
 
 // Trellis
 
@@ -508,7 +475,7 @@ static int TrellisQuantizeBlock(const VP8EncIterator* const it,
     int level0;
     if (coeff0 > 2047) coeff0 = 2047;
 
-    level0 = DIV(coeff0, iQ, B);
+    level0 = QUANTDIV(coeff0, iQ, B);
     // test all alternate level values around level0.
     for (m = -MIN_DELTA; m <= MAX_DELTA; ++m) {
       Node* const cur = &NODE(n, m);
@@ -604,7 +571,7 @@ static int TrellisQuantizeBlock(const VP8EncIterator* const it,
 
 #undef NODE
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Performs: difference, transform, quantize, back-transform, add
 // all at once. Output is the reconstructed block in *yuv_out, and the
 // quantized levels in *levels.
@@ -625,7 +592,7 @@ static int ReconstructIntra16(VP8EncIterator* const it,
     VP8FTransform(src + VP8Scan[n], ref + VP8Scan[n], tmp[n]);
   }
   VP8FTransformWHT(tmp[0], dc_tmp);
-  nz |= QuantizeBlock(dc_tmp, rd->y_dc_levels, 0, &dqm->y2_) << 24;
+  nz |= VP8EncQuantizeBlock(dc_tmp, rd->y_dc_levels, 0, &dqm->y2_) << 24;
 
   if (DO_TRELLIS_I16 && it->do_trellis_) {
     int x, y;
@@ -642,14 +609,14 @@ static int ReconstructIntra16(VP8EncIterator* const it,
     }
   } else {
     for (n = 0; n < 16; ++n) {
-      nz |= QuantizeBlock(tmp[n], rd->y_ac_levels[n], 1, &dqm->y1_) << n;
+      nz |= VP8EncQuantizeBlock(tmp[n], rd->y_ac_levels[n], 1, &dqm->y1_) << n;
     }
   }
 
   // Transform back
   VP8ITransformWHT(dc_tmp, tmp[0]);
-  for (n = 0; n < 16; ++n) {
-    VP8ITransform(ref + VP8Scan[n], tmp[n], yuv_out + VP8Scan[n]);
+  for (n = 0; n < 16; n += 2) {
+    VP8ITransform(ref + VP8Scan[n], tmp[n], yuv_out + VP8Scan[n], 1);
   }
 
   return nz;
@@ -673,9 +640,9 @@ static int ReconstructIntra4(VP8EncIterator* const it,
     nz = TrellisQuantizeBlock(it, tmp, levels, ctx, 3, &dqm->y1_,
                               dqm->lambda_trellis_i4_);
   } else {
-    nz = QuantizeBlock(tmp, levels, 0, &dqm->y1_);
+    nz = VP8EncQuantizeBlock(tmp, levels, 0, &dqm->y1_);
   }
-  VP8ITransform(ref, tmp, yuv_out);
+  VP8ITransform(ref, tmp, yuv_out, 0);
   return nz;
 }
 
@@ -699,8 +666,8 @@ static int ReconstructUV(VP8EncIterator* const it, VP8ModeScore* const rd,
         for (x = 0; x < 2; ++x, ++n) {
           const int ctx = it->top_nz_[4 + ch + x] + it->left_nz_[4 + ch + y];
           const int non_zero =
-            TrellisQuantizeBlock(it, tmp[n], rd->uv_levels[n], ctx, 2, &dqm->uv_,
-                                 dqm->lambda_trellis_uv_);
+            TrellisQuantizeBlock(it, tmp[n], rd->uv_levels[n], ctx, 2,
+                                 &dqm->uv_, dqm->lambda_trellis_uv_);
           it->top_nz_[4 + ch + x] = it->left_nz_[4 + ch + y] = non_zero;
           nz |= non_zero << n;
         }
@@ -708,17 +675,17 @@ static int ReconstructUV(VP8EncIterator* const it, VP8ModeScore* const rd,
     }
   } else {
     for (n = 0; n < 8; ++n) {
-      nz |= QuantizeBlock(tmp[n], rd->uv_levels[n], 0, &dqm->uv_) << n;
+      nz |= VP8EncQuantizeBlock(tmp[n], rd->uv_levels[n], 0, &dqm->uv_) << n;
     }
   }
 
-  for (n = 0; n < 8; ++n) {
-    VP8ITransform(ref + VP8Scan[16 + n], tmp[n], yuv_out + VP8Scan[16 + n]);
+  for (n = 0; n < 8; n += 2) {
+    VP8ITransform(ref + VP8Scan[16 + n], tmp[n], yuv_out + VP8Scan[16 + n], 1);
   }
   return (nz << 16);
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // RD-opt decision. Reconstruct each modes, evalue distortion and bit-cost.
 // Pick the mode is lower RD-cost = Rate + lamba * Distortion.
 
@@ -771,7 +738,7 @@ static void PickBestIntra16(VP8EncIterator* const it, VP8ModeScore* const rd) {
   VP8SetIntra16Mode(it, rd->mode_i16);
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 // return the cost array corresponding to the surrounding prediction modes.
 static const uint16_t* GetCostModeI4(VP8EncIterator* const it,
@@ -790,10 +757,15 @@ static int PickBestIntra4(VP8EncIterator* const it, VP8ModeScore* const rd) {
   const int tlambda = dqm->tlambda_;
   const uint8_t* const src0 = it->yuv_in_ + Y_OFF;
   uint8_t* const best_blocks = it->yuv_out2_ + Y_OFF;
+  int total_header_bits = 0;
   VP8ModeScore rd_best;
 
+  if (enc->max_i4_header_bits_ == 0) {
+    return 0;
+  }
+
   InitScore(&rd_best);
-  rd_best.score = 0;
+  rd_best.score = 211;  // '211' is the value of VP8BitCost(0, 145)
   VP8IteratorStartI4(it);
   do {
     VP8ModeScore rd_i4;
@@ -832,7 +804,9 @@ static int PickBestIntra4(VP8EncIterator* const it, VP8ModeScore* const rd) {
     }
     SetRDScore(dqm->lambda_mode_, &rd_i4);
     AddScore(&rd_best, &rd_i4);
-    if (rd_best.score >= rd->score) {
+    total_header_bits += mode_costs[best_mode];
+    if (rd_best.score >= rd->score ||
+        total_header_bits > enc->max_i4_header_bits_) {
       return 0;
     }
     // Copy selected samples if not in the right place already.
@@ -850,7 +824,7 @@ static int PickBestIntra4(VP8EncIterator* const it, VP8ModeScore* const rd) {
   return 1;   // select intra4x4 over intra16x16
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 static void PickBestUV(VP8EncIterator* const it, VP8ModeScore* const rd) {
   VP8Encoder* const enc = it->enc_;
@@ -888,7 +862,7 @@ static void PickBestUV(VP8EncIterator* const it, VP8ModeScore* const rd) {
   AddScore(rd, &rd_best);
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Final reconstruction and quantization.
 
 static void SimpleQuantize(VP8EncIterator* const it, VP8ModeScore* const rd) {
@@ -915,7 +889,7 @@ static void SimpleQuantize(VP8EncIterator* const it, VP8ModeScore* const rd) {
   rd->nz = nz;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Entry point
 
 int VP8Decimate(VP8EncIterator* const it, VP8ModeScore* const rd, int rd_opt) {

@@ -15,13 +15,22 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="dec\bits.c">
+    <ClCompile Include="dec\alpha.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="dec\dsp.c">
+    <ClCompile Include="dec\buffer.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="dec\frame.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dec\idec.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dec\io.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dec\layer.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="dec\quant.c">
@@ -36,13 +45,37 @@
     <ClCompile Include="dec\webp.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="dec\yuv.c">
+    <ClCompile Include="dsp\cpu.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dsp\dec.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dsp\dec_neon.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dsp\dec_sse2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dsp\enc.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dsp\enc_sse2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dsp\upsampling.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dsp\upsampling_sse2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dsp\yuv.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="enc\alpha.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="enc\analysis.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="enc\bit_writer.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="enc\config.c">
@@ -51,7 +84,10 @@
     <ClCompile Include="enc\cost.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="enc\dsp.c">
+    <ClCompile Include="enc\enc.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="enc\enc_sse2.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="enc\filter.c">
@@ -61,6 +97,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="enc\iterator.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="enc\layer.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="enc\picture.c">
@@ -76,6 +115,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="enc\webpenc.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\bit_reader.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\bit_writer.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\thread.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

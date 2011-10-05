@@ -9,25 +9,26 @@
 //
 // Author: Skal (pascal.massimino@gmail.com)
 
-#include "bits.h"
+#include "./bit_reader.h"
 
 #if defined(__cplusplus) || defined(c_plusplus)
 extern "C" {
 #endif
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // VP8BitReader
 
-void VP8Init(VP8BitReader* const br, const uint8_t* buf, uint32_t size) {
+void VP8InitBitReader(VP8BitReader* const br,
+                      const uint8_t* const start, const uint8_t* const end) {
   assert(br);
-  assert(buf);
-  br->range_ = 255 - 1;
-  br->buf_ = buf;
-  br->buf_end_ = buf + size;
-  // Need two initial bytes.
-  br->value_ = (VP8GetByte(br) << 8) | VP8GetByte(br);
-  br->left_ = -8;
-  br->eof_ = 0;
+  assert(start);
+  assert(start <= end);
+  br->range_   = 255 - 1;
+  br->buf_     = start;
+  br->buf_end_ = end;
+  br->value_   = 0;
+  br->missing_ = 8;
+  br->eof_     = 0;
 }
 
 const uint8_t kVP8Log2Range[128] = {
@@ -55,7 +56,7 @@ const uint8_t kVP8NewRange[128] = {
   241, 243, 245, 247, 249, 251, 253, 127
 };
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Higher-level calls
 
 uint32_t VP8GetValue(VP8BitReader* const br, int bits) {
@@ -71,7 +72,7 @@ int32_t VP8GetSignedValue(VP8BitReader* const br, int bits) {
   return VP8Get(br) ? -value : value;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 #if defined(__cplusplus) || defined(c_plusplus)
 }    // extern "C"

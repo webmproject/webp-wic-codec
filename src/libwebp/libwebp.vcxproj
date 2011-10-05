@@ -19,27 +19,43 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="dec\bits.c" />
-    <ClCompile Include="dec\dsp.c" />
+    <ClCompile Include="dec\alpha.c" />
+    <ClCompile Include="dec\buffer.c" />
     <ClCompile Include="dec\frame.c" />
+    <ClCompile Include="dec\idec.c" />
+    <ClCompile Include="dec\io.c" />
+    <ClCompile Include="dec\layer.c" />
     <ClCompile Include="dec\quant.c" />
     <ClCompile Include="dec\tree.c" />
     <ClCompile Include="dec\vp8.c" />
     <ClCompile Include="dec\webp.c" />
-    <ClCompile Include="dec\yuv.c" />
+    <ClCompile Include="dsp\cpu.c" />
+    <ClCompile Include="dsp\dec.c" />
+    <ClCompile Include="dsp\dec_neon.c" />
+    <ClCompile Include="dsp\dec_sse2.c" />
+    <ClCompile Include="dsp\enc.c" />
+    <ClCompile Include="dsp\enc_sse2.c" />
+    <ClCompile Include="dsp\upsampling.c" />
+    <ClCompile Include="dsp\upsampling_sse2.c" />
+    <ClCompile Include="dsp\yuv.c" />
+    <ClCompile Include="enc\alpha.c" />
     <ClCompile Include="enc\analysis.c" />
-    <ClCompile Include="enc\bit_writer.c" />
     <ClCompile Include="enc\config.c" />
     <ClCompile Include="enc\cost.c" />
-    <ClCompile Include="enc\dsp.c" />
+    <ClCompile Include="enc\enc.c" />
+    <ClCompile Include="enc\enc_sse2.c" />
     <ClCompile Include="enc\filter.c" />
     <ClCompile Include="enc\frame.c" />
     <ClCompile Include="enc\iterator.c" />
+    <ClCompile Include="enc\layer.c" />
     <ClCompile Include="enc\picture.c" />
     <ClCompile Include="enc\quant.c" />
     <ClCompile Include="enc\syntax.c" />
     <ClCompile Include="enc\tree.c" />
     <ClCompile Include="enc\webpenc.c" />
+    <ClCompile Include="utils\bit_reader.c" />
+    <ClCompile Include="utils\bit_writer.c" />
+    <ClCompile Include="utils\thread.c" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{8228FEC1-478D-47A9-836D-85E7127055EA}</ProjectGuid>

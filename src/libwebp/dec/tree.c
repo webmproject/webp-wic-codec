@@ -9,7 +9,6 @@
 //
 // Author: Skal (pascal.massimino@gmail.com)
 
-#include <stdio.h>
 #include "vp8i.h"
 
 #define USE_GENERIC_TREE
@@ -66,7 +65,7 @@ static const int8_t kMVRef4[6] = {
 };
 #endif
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Default probabilities
 
 // Inter
@@ -386,7 +385,7 @@ void VP8ParseIntraMode(VP8BitReader* const br,  VP8Decoder* const dec) {
                : VP8GetBit(br, 183) ? TM_PRED : H_PRED;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Paragraph 13
 
 static const uint8_t

@@ -74,6 +74,7 @@
             <RegistryValue Root="HKCR" Key="webpfile\shell\open\command" Value="%SystemRoot%\System32\rundll32.exe &quot;%ProgramFiles%\[WindowsPhotoDir]\PhotoViewer.dll&quot;, ImageView_Fullscreen %1" Type="expandable" Action="write" />
             <RegistryValue Root="HKCR" Key="webpfile\shell\open" Name="MuiVerb" Value="@%ProgramFiles%\[WindowsPhotoDir]\photoviewer.dll,-3043" Type="expandable" Action="write" />
             <RegistryValue Root="HKCR" Key="webpfile\shell\printto\command" Value="%SystemRoot%\System32\rundll32.exe %SystemRoot%\System32\shimgvw.dll, ImageView_PrintTo /pt %1 %2 %3 %4" Type="expandable" Action="write" />
+            <RegistryValue Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\PropertySystem\PropertyHandlers\.webp" Value="{780cc6c8-1ca9-4e59-8225-c0f69e3ed512}" Type="string" Action="write" />
           </Component>
         </Directory>
       </Directory>

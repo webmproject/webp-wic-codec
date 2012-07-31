@@ -16,12 +16,7 @@
 #include <cstdlib>
 #include <memory>
 
-#ifdef USE_LIBVPX
-#include "vpx/vpx_decoder.h"
-#include "vpx/vp8dx.h"
-#else
 #include "webp/decode.h"
-#endif
 #include "webpimg.h"
 
 #ifdef WEBP_DEBUG_LOGGING
@@ -94,20 +89,10 @@ HRESULT DecodeFrame::CreateFromVP8Stream(BYTE* vp8_bitstream, DWORD stream_size,
   // TODO: Do the decoding on the first call to CopyPixels to be OK with the
   // letter of the documentation. Maybe we could do progressive decoding if the
   // callers request the image in the top to bottom order?
-#ifdef USE_LIBVPX
-  WebPResult decode_result =
-    VPXDecode(vp8_bitstream, stream_size, &pImage->Y,
-              &pImage->U, &pImage->V, &pImage->width,
-              &pImage->height);
-  pImage->yStride = pImage->width;
-  pImage->uvStride = ((pImage->yStride + 1) >> 1);
-  bool decodedImage = (decode_result == webp_success);
-#else
   pImage->Y = WebPDecodeYUV(vp8_bitstream, stream_size, &pImage->width,
       &pImage->height, &pImage->U, &pImage->V, &pImage->yStride,
       &pImage->uvStride);
   bool decodedImage = (pImage->Y != NULL);
-#endif
 
 #ifdef WEBP_DEBUG_LOGGING
   double time = StopwatchReadAndReset(&stopwatch);

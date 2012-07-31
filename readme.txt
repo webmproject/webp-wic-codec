@@ -1,10 +1,9 @@
-Windows Imaging Component wrapper around the libvpx codec for WebP support.
+Windows Imaging Component wrapper around libwebp for WebP support.
 Currently, only decoding is supported, but that allows to e.g., see the files
 in Windows PhotoViewer.
 
 Directories:
 example - an example webp file.
-libvpx - binary versions of libvpx, both debug and release, x64 and x86.
 setup - WiX scripts to create MSI packages and a wrapper setup.
 src - source code of the WIC interfaces.
 test - tests comparing the WebP codec with the builtin Jpeg codec.

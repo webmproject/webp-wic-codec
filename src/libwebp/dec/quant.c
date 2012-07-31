@@ -1,4 +1,4 @@
-// Copyright 2010 Google Inc.
+// Copyright 2010 Google Inc. All Rights Reserved.
 //
 // This code is licensed under the same terms as WebM:
 //  Software License Agreement:  http://www.webmproject.org/license/software/
@@ -9,13 +9,13 @@
 //
 // Author: Skal (pascal.massimino@gmail.com)
 
-#include "vp8i.h"
+#include "./vp8i.h"
 
 #if defined(__cplusplus) || defined(c_plusplus)
 extern "C" {
 #endif
 
-static inline int clip(int v, int M) {
+static WEBP_INLINE int clip(int v, int M) {
   return v < 0 ? 0 : v > M ? M : v;
 }
 

@@ -1,4 +1,4 @@
-// Copyright 2011 Google Inc.
+// Copyright 2011 Google Inc. All Rights Reserved.
 //
 // This code is licensed under the same terms as WebM:
 //  Software License Agreement:  http://www.webmproject.org/license/software/
@@ -12,7 +12,7 @@
 #ifndef WEBP_ENC_VP8ENCI_H_
 #define WEBP_ENC_VP8ENCI_H_
 
-#include "string.h"     // for memcpy()
+#include <string.h>     // for memcpy()
 #include "../webp/encode.h"
 #include "../dsp/dsp.h"
 #include "../utils/bit_writer.h"
@@ -27,7 +27,7 @@ extern "C" {
 // version numbers
 #define ENC_MAJ_VERSION 0
 #define ENC_MIN_VERSION 1
-#define ENC_REV_VERSION 3
+#define ENC_REV_VERSION 99
 
 // size of histogram used by CollectHistogram.
 #define MAX_COEFF_THRESH   64
@@ -157,7 +157,7 @@ typedef int64_t score_t;     // type used for scores, rate, distortion
 #define BIAS(b)  ((b) << (QFIX - 8))
 // Fun fact: this is the _only_ line where we're actually being lossy and
 // discarding bits.
-static inline int QUANTDIV(int n, int iQ, int B) {
+static WEBP_INLINE int QUANTDIV(int n, int iQ, int B) {
   return (n * iQ + B) >> QFIX;
 }
 extern const uint8_t VP8Zigzag[16];
@@ -165,8 +165,9 @@ extern const uint8_t VP8Zigzag[16];
 //------------------------------------------------------------------------------
 // Headers
 
+typedef uint32_t proba_t;   // 16b + 16b
 typedef uint8_t ProbaArray[NUM_CTX][NUM_PROBAS];
-typedef uint64_t StatsArray[NUM_CTX][NUM_PROBAS][2];
+typedef proba_t StatsArray[NUM_CTX][NUM_PROBAS];
 typedef uint16_t CostArray[NUM_CTX][MAX_VARIABLE_LEVEL + 1];
 typedef double LFStats[NUM_MB_SEGMENTS][MAX_LF_LEVELS];  // filter stats
 
@@ -185,8 +186,9 @@ typedef struct {
   uint8_t segments_[3];     // probabilities for segment tree
   uint8_t skip_proba_;      // final probability of being skipped.
   ProbaArray coeffs_[NUM_TYPES][NUM_BANDS];      // 924 bytes
-  StatsArray stats_[NUM_TYPES][NUM_BANDS];       // 7.4k
+  StatsArray stats_[NUM_TYPES][NUM_BANDS];       // 4224 bytes
   CostArray level_cost_[NUM_TYPES][NUM_BANDS];   // 11.4k
+  int dirty_;               // if true, need to call VP8CalculateLevelCosts()
   int use_skip_proba_;      // Note: we always use skip_proba for now.
   int nb_skip_;             // number of skipped blocks
 } VP8Proba;
@@ -241,7 +243,7 @@ typedef struct {
   int16_t y_ac_levels[16][16];
   int16_t uv_levels[4 + 4][16];
   int mode_i16;               // mode number for intra16 prediction
-  int modes_i4[16];           // mode numbers for intra4 predictions
+  uint8_t modes_i4[16];       // mode numbers for intra4 predictions
   int mode_uv;                // mode number of chroma prediction
   uint32_t nz;                // non-zero blocks
 } VP8ModeScore;
@@ -272,6 +274,7 @@ typedef struct {
   LFStats*      lf_stats_;         // filter stats (borrowed from enc_)
   int           do_trellis_;       // if true, perform extra level optimisation
   int           done_;             // true when scan is finished
+  int           percent0_;         // saved initial progress percent
 } VP8EncIterator;
 
   // in iterator.c
@@ -288,6 +291,9 @@ void VP8IteratorExport(const VP8EncIterator* const it);
 // it->yuv_out_ or it->yuv_in_.
 int VP8IteratorNext(VP8EncIterator* const it,
                     const uint8_t* const block_to_save);
+// Report progression based on macroblock rows. Return 0 for user-abort request.
+int VP8IteratorProgress(const VP8EncIterator* const it,
+                        int final_delta_percent);
 // Intra4x4 iterations
 void VP8IteratorStartI4(VP8EncIterator* const it);
 // returns true if not done.
@@ -300,11 +306,52 @@ void VP8IteratorBytesToNz(VP8EncIterator* const it);
 
 // Helper functions to set mode properties
 void VP8SetIntra16Mode(const VP8EncIterator* const it, int mode);
-void VP8SetIntra4Mode(const VP8EncIterator* const it, int modes[16]);
+void VP8SetIntra4Mode(const VP8EncIterator* const it, const uint8_t* modes);
 void VP8SetIntraUVMode(const VP8EncIterator* const it, int mode);
 void VP8SetSkip(const VP8EncIterator* const it, int skip);
 void VP8SetSegment(const VP8EncIterator* const it, int segment);
-void VP8IteratorResetCosts(VP8EncIterator* const it);
+
+//------------------------------------------------------------------------------
+// Paginated token buffer
+
+// WIP: #define USE_TOKEN_BUFFER
+
+#ifdef USE_TOKEN_BUFFER
+
+#define MAX_NUM_TOKEN 2048
+
+typedef struct VP8Tokens VP8Tokens;
+struct VP8Tokens {
+  uint16_t tokens_[MAX_NUM_TOKEN];  // bit#15: bit, bits 0..14: slot
+  int left_;
+  VP8Tokens* next_;
+};
+
+typedef struct {
+  VP8Tokens* rows_;
+  uint16_t* tokens_;    // set to (*last_)->tokens_
+  VP8Tokens** last_;
+  int left_;
+  int error_;  // true in case of malloc error
+} VP8TBuffer;
+
+void VP8TBufferInit(VP8TBuffer* const b);    // initialize an empty buffer
+int VP8TBufferNewPage(VP8TBuffer* const b);  // allocate a new page
+void VP8TBufferClear(VP8TBuffer* const b);   // de-allocate memory
+
+int VP8EmitTokens(const VP8TBuffer* const b, VP8BitWriter* const bw,
+                  const uint8_t* const probas);
+
+static WEBP_INLINE int VP8AddToken(VP8TBuffer* const b,
+                                   int bit, int proba_idx) {
+  if (b->left_ > 0 || VP8TBufferNewPage(b)) {
+    const int slot = --b->left_;
+    b->tokens_[slot] = (bit << 15) | proba_idx;
+  }
+  return bit;
+}
+
+#endif  // USE_TOKEN_BUFFER
 
 //------------------------------------------------------------------------------
 // VP8Encoder
@@ -330,10 +377,12 @@ struct VP8Encoder {
   VP8BitWriter bw_;                         // part0
   VP8BitWriter parts_[MAX_NUM_PARTITIONS];  // token partitions
 
+  int percent_;                             // for progress
+
   // transparency blob
   int has_alpha_;
   uint8_t* alpha_data_;       // non-NULL if transparency is present
-  size_t alpha_data_size_;
+  uint32_t alpha_data_size_;
 
   // enhancement layer
   int use_layer_;
@@ -401,6 +450,8 @@ void VP8CodeIntraModes(VP8Encoder* const enc);
 // and appending an assembly of all the pre-coded token partitions.
 // Return true if everything is ok.
 int VP8EncWrite(VP8Encoder* const enc);
+// Release memory allocated for bit-writing in VP8EncLoop & seq.
+void VP8EncFreeBitWriters(VP8Encoder* const enc);
 
   // in frame.c
 extern const uint8_t VP8EncBands[16 + 1];
@@ -421,7 +472,9 @@ int VP8StatLoop(VP8Encoder* const enc);
 
   // in webpenc.c
 // Assign an error code to a picture. Return false for convenience.
-int WebPEncodingSetError(WebPPicture* const pic, WebPEncodingError error);
+int WebPEncodingSetError(const WebPPicture* const pic, WebPEncodingError error);
+int WebPReportProgress(const WebPPicture* const pic,
+                       int percent, int* const percent_store);
 
   // in analysis.c
 // Main analysis loop. Decides the segmentations and complexity.
@@ -436,7 +489,6 @@ int VP8Decimate(VP8EncIterator* const it, VP8ModeScore* const rd, int rd_opt);
 
   // in alpha.c
 void VP8EncInitAlpha(VP8Encoder* enc);           // initialize alpha compression
-void VP8EncCodeAlphaBlock(VP8EncIterator* it);   // analyze or code a macroblock
 int VP8EncFinishAlpha(VP8Encoder* enc);          // finalize compressed data
 void VP8EncDeleteAlpha(VP8Encoder* enc);         // delete compressed data
 
@@ -447,9 +499,22 @@ int VP8EncFinishLayer(VP8Encoder* const enc);    // finalize coding
 void VP8EncDeleteLayer(VP8Encoder* enc);         // reclaim memory
 
   // in filter.c
-extern void VP8InitFilter(VP8EncIterator* const it);
-extern void VP8StoreFilterStats(VP8EncIterator* const it);
-extern void VP8AdjustFilterStrength(VP8EncIterator* const it);
+
+// SSIM utils
+typedef struct {
+  double w, xm, ym, xxm, xym, yym;
+} DistoStats;
+void VP8SSIMAddStats(const DistoStats* const src, DistoStats* const dst);
+void VP8SSIMAccumulatePlane(const uint8_t* src1, int stride1,
+                            const uint8_t* src2, int stride2,
+                            int W, int H, DistoStats* const stats);
+double VP8SSIMGet(const DistoStats* const stats);
+double VP8SSIMGetSquaredError(const DistoStats* const stats);
+
+// autofilter
+void VP8InitFilter(VP8EncIterator* const it);
+void VP8StoreFilterStats(VP8EncIterator* const it);
+void VP8AdjustFilterStrength(VP8EncIterator* const it);
 
 //------------------------------------------------------------------------------
 

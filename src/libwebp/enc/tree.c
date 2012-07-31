@@ -1,4 +1,4 @@
-// Copyright 2011 Google Inc.
+// Copyright 2011 Google Inc. All Rights Reserved.
 //
 // This code is licensed under the same terms as WebM:
 //  Software License Agreement:  http://www.webmproject.org/license/software/
@@ -9,7 +9,7 @@
 //
 // Author: Skal (pascal.massimino@gmail.com)
 
-#include "vp8enci.h"
+#include "./vp8enci.h"
 
 #if defined(__cplusplus) || defined(c_plusplus)
 extern "C" {
@@ -158,9 +158,12 @@ const uint8_t
 
 void VP8DefaultProbas(VP8Encoder* const enc) {
   VP8Proba* const probas = &enc->proba_;
+  probas->use_skip_proba_ = 0;
   memset(probas->segments_, 255u, sizeof(probas->segments_));
   memcpy(probas->coeffs_, VP8CoeffsProba0, sizeof(VP8CoeffsProba0));
-  probas->use_skip_proba_ = 0;
+  // Note: we could hard-code the level_costs_ corresponding to VP8CoeffsProba0,
+  // but that's ~11k of static data. Better call VP8CalculateLevelCosts() later.
+  probas->dirty_ = 1;
 }
 
 // Paragraph 11.5.  900bytes.

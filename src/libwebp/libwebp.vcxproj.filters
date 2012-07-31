@@ -170,6 +170,9 @@
     <ClCompile Include="utils\thread.c">
       <Filter>Source Files\utils</Filter>
     </ClCompile>
+    <ClCompile Include="utils\utils.c">
+      <Filter>Source Files\utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dec\decode_vp8.h">
@@ -249,6 +252,9 @@
     </ClInclude>
     <ClInclude Include="webp\types.h">
       <Filter>Source Files\webp</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\utils.h">
+      <Filter>Source Files\utils</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

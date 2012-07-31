@@ -65,6 +65,7 @@
     <ClCompile Include="utils\quant_levels.c" />
     <ClCompile Include="utils\rescaler.c" />
     <ClCompile Include="utils\thread.c" />
+    <ClCompile Include="utils\utils.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dec\decode_vp8.h" />
@@ -88,6 +89,7 @@
     <ClInclude Include="utils\quant_levels.h" />
     <ClInclude Include="utils\rescaler.h" />
     <ClInclude Include="utils\thread.h" />
+    <ClInclude Include="utils\utils.h" />
     <ClInclude Include="webp\decode.h" />
     <ClInclude Include="webp\encode.h" />
     <ClInclude Include="webp\format_constants.h" />

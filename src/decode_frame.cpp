@@ -25,9 +25,8 @@
 
 const int kBytesPerPixel = 3;
 
-YUVImage::~YUVImage() {
-  // Note: only Y point to allocated memory. U and V are pointers inside Y.
-  std::free(Y);
+RGBImage::~RGBImage() {
+  std::free(rgb);
 }
 
 static void YUV420toRGB24Line(const BYTE* y_src,
@@ -72,7 +71,7 @@ HRESULT DecodeFrame::CreateFromVP8Stream(BYTE* vp8_bitstream, DWORD stream_size,
 
   (*ppOutput).reset(NULL);
 
-  std::auto_ptr<YUVImage> pImage(new (std::nothrow) YUVImage());
+  std::auto_ptr<RGBImage> pImage(new (std::nothrow) RGBImage());
   if (pImage.get() == NULL)
     return E_OUTOFMEMORY;
 
@@ -84,19 +83,18 @@ HRESULT DecodeFrame::CreateFromVP8Stream(BYTE* vp8_bitstream, DWORD stream_size,
   // Note: according to the documentation, the actual decoding should happen
   // in CopyPixels. However, this would need to be implemented efficiently, as
   // e.g., the photo viewers load the image row by row, with multiple calls to
-  // CopyPixels. Thus, for simplicity, we do all expect for YUV -> RGB
-  // conversion here.
+  // CopyPixels.
   // TODO: Do the decoding on the first call to CopyPixels to be OK with the
   // letter of the documentation. Maybe we could do progressive decoding if the
   // callers request the image in the top to bottom order?
-  pImage->Y = WebPDecodeYUV(vp8_bitstream, stream_size, &pImage->width,
-      &pImage->height, &pImage->U, &pImage->V, &pImage->yStride,
-      &pImage->uvStride);
-  bool decodedImage = (pImage->Y != NULL);
+  pImage->rgb = WebPDecodeBGR(vp8_bitstream, stream_size,
+                              &pImage->width, &pImage->height);
+  pImage->stride = pImage->width * kBytesPerPixel;
+  const bool decodedImage = (pImage->rgb != NULL);
 
 #ifdef WEBP_DEBUG_LOGGING
   double time = StopwatchReadAndReset(&stopwatch);
-  TRACE1("Decode (VP8 -> YUV) time: %f\n", time);
+  TRACE1("Decode (VP8 -> BGR) time: %f\n", time);
 #endif  // WEBP_DEBUG_LOGGING
 
   if (!decodedImage) {
@@ -110,9 +108,7 @@ HRESULT DecodeFrame::CreateFromVP8Stream(BYTE* vp8_bitstream, DWORD stream_size,
   }
 
   // Sanity checks:
-  if (pImage->width < 0 || pImage->height < 0
-      || pImage->uvStride < (pImage->width+1)/2
-      || pImage->yStride < pImage->width) {
+  if (pImage->width <= 0 || pImage->height <= 0) {
     TRACE("Invalid sizes from decoder!\n");
     return E_FAIL;
   }
@@ -195,19 +191,12 @@ HRESULT DecodeFrame::CopyPixels(const WICRect *prc, UINT cbStride, UINT cbBuffer
   if (rect.Width == 0 || rect.Height == 0)
     return S_OK;
 
-  int y_stride = image_->yStride;
-  int uv_stride = image_->uvStride;
-  /* note that the U, V upsampling in height is happening here as the U, V
-   * buffers sent to successive odd-even pair of lines is same.
-   */
-  BYTE *dst_buffer = pbBuffer;
+  BYTE* dst_buffer = pbBuffer;
+  const int src_stride = image_->stride;
+  const int x_offset = rect.X * kBytesPerPixel;
+  const int width = rect.Width * kBytesPerPixel;
   for (int src_y = rect.Y; src_y < rect.Y + rect.Height; ++src_y) {
-    YUV420toRGB24Line(image_->Y + src_y * y_stride,
-                      image_->U + (src_y >> 1) * uv_stride,
-                      image_->V + (src_y >> 1) * uv_stride,
-                      rect.X,
-                      rect.X + rect.Width,
-                      dst_buffer);
+    memcpy(dst_buffer, image_->rgb + src_y * src_stride + x_offset, width);
     dst_buffer += cbStride;
   }
 

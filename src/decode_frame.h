@@ -16,24 +16,21 @@
 #include "main.h"
 #include "utils.h"
 
-struct YUVImage {
-  YUVImage() :Y(NULL), U(NULL), V(NULL), width(0), height(0) {}
-  ~YUVImage();
+struct RGBImage {
+  RGBImage() : rgb(NULL), width(0), height(0) {}
+  ~RGBImage();
 
-  BYTE* Y;
-  BYTE* U;
-  BYTE* V;
+  BYTE* rgb;
   int width;
   int height;
-  int yStride;
-  int uvStride;
+  int stride;
 };
 
 // The single frame available in a WebP image file in a decoded form.
 // Thread-safety: immutable.
 class DecodeFrame : public ComObjectBase<IWICBitmapFrameDecode> {
 public:
-  DecodeFrame(YUVImage* image) :image_(image) { }
+  explicit DecodeFrame(const RGBImage* image) : image_(image) {}
   ~DecodeFrame() { delete image_; }
 
   static HRESULT CreateFromVP8Stream(BYTE* vp8_bitstream, DWORD stream_size, ComPtr<DecodeFrame>* ppOutput);
@@ -53,7 +50,7 @@ public:
   virtual HRESULT STDMETHODCALLTYPE GetColorContexts(UINT cCount, IWICColorContext **ppIColorContexts, UINT *pcActualCount);
   virtual HRESULT STDMETHODCALLTYPE GetThumbnail(IWICBitmapSource **ppIThumbnail);
 private:
-  const YUVImage * const image_;
+  const RGBImage* const image_;
 };
 
 

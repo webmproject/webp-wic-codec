@@ -13,6 +13,7 @@
 #include "decode_container.h"
 
 #include <new>
+#include "webp/decode.h"  // for WebPGetInfo
 #include "decode_frame.h"
 #include "uuid.h"
 
@@ -36,29 +37,35 @@ HRESULT DecodeContainer::QueryInterface(REFIID riid, void** ppvObject) {
   return S_OK;
 }
 
-HRESULT ParseHeader(IStream* pIStream, DWORD* container_size, DWORD* vp8_size) {
+// Parse the RIFF header and return the total file size in '*file_size'.
+// pIStream's seek pointer is left unchanged on success.
+HRESULT ParseHeader(IStream* pIStream, DWORD* file_size) {
+  // read enough so WebPGetInfo can do basic validation.
+  const int kHeaderSize = 32;
+  BYTE header[kHeaderSize];
   HRESULT ret;
-  BYTE header[20];
   ULONG read;
 
-  if (FAILED(ret = pIStream->Read(header, 20, &read)))
+  if (FAILED(ret = pIStream->Read(header, sizeof(header), &read)))
     return ret;
-  if (read < 20 || memcmp(&header[0], "RIFF", 4) != 0 ||
-      memcmp(&header[8], "WEBPVP8 ", 8) != 0) {
-    TRACE("Bad magic\n");
-    return WINCODEC_ERR_BADHEADER;
+  if (read < kHeaderSize) {
+    TRACE("Read error\n");
+    return E_UNEXPECTED;
   }
 
-  *container_size = get_le32(&header[4]);
-  *vp8_size = get_le32(&header[16]);
-  // Check that VP8 data fits in the container.
-  if (*container_size < 12 || *vp8_size > *container_size - 12) {
-    TRACE2("Wrong sizes (container: %d, vp8: %d)\n", container_size, vp8_size);
-    return WINCODEC_ERR_BADHEADER;
+  if (!WebPGetInfo(header, kHeaderSize, NULL, NULL)) {
+    TRACE("WebPGetInfo failed\n");
+    return WINCODEC_ERR_BADIMAGE;
   }
 
-  *container_size -= 12;  // Take into account the header we've already read.
-  return S_OK;
+  const DWORD riff_size = get_le32(&header[4]);
+  *file_size = riff_size + 8;
+
+  // reset pIStream
+  LARGE_INTEGER offset;
+  offset.QuadPart = -kHeaderSize;
+  ret = pIStream->Seek(offset, STREAM_SEEK_CUR, NULL);
+  return ret;
 }
 
 HRESULT DecodeContainer::QueryCapability(IStream* pIStream, DWORD* pdwCapability) {
@@ -66,8 +73,8 @@ HRESULT DecodeContainer::QueryCapability(IStream* pIStream, DWORD* pdwCapability
   if (pdwCapability == NULL)
     return E_INVALIDARG;
 
-  DWORD tmp1, tmp2;
-  HRESULT ret = ParseHeader(pIStream, &tmp1, &tmp2);
+  DWORD tmp1;
+  HRESULT ret = ParseHeader(pIStream, &tmp1);
   if (ret == WINCODEC_ERR_BADHEADER)
     return WINCODEC_ERR_WRONGSTATE;  // That's what Win7 jpeg codec returns.
   if (ret == S_OK)
@@ -90,27 +97,29 @@ HRESULT DecodeContainer::Initialize(IStream* pIStream, WICDecodeOptions cacheOpt
   }
 
   HRESULT ret;
-  DWORD container_size, vp8_size;
-  ULONG read;
+  DWORD file_size;
 
-  ret = ParseHeader(pIStream, &container_size, &vp8_size);
+  ret = ParseHeader(pIStream, &file_size);
   if (FAILED(ret))
     return ret;
 
-  scoped_buffer vp8_data(vp8_size);
-  if (vp8_data.alloc_failed()) {
-    TRACE1("Couldn't allocate %d for VP8 data\n", vp8_size);
+  scoped_buffer file_data(file_size);
+  if (file_data.alloc_failed()) {
+    TRACE1("Couldn't allocate %u for file data\n", file_size);
     return E_OUTOFMEMORY;
   }
-  if (FAILED(ret = pIStream->Read(vp8_data.get(), vp8_size, &read)))
+
+  ULONG read;
+  if (FAILED(ret = pIStream->Read(file_data.get(), file_size, &read)))
     return ret;
-  if (read < vp8_size) {
-    TRACE2("Premature end of file (read %d instead of %d)\n", read, vp8_size);
+  if (read < file_size) {
+    TRACE2("Premature end of file (read %u instead of %u)\n", read, file_size);
     return WINCODEC_ERR_BADHEADER;
   }
 
   ComPtr<DecodeFrame> tmp_frame;
-  ret = DecodeFrame::CreateFromVP8Stream(vp8_data.get(), vp8_size, &tmp_frame);
+  ret = DecodeFrame::CreateFromVP8Stream(file_data.get(), file_size,
+                                         &tmp_frame);
   if (FAILED(ret))
     return ret;
 

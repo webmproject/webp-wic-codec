@@ -21,7 +21,7 @@
 #include "stopwatch.h"
 #endif  // WEBP_DEBUG_LOGGING
 
-const int kBytesPerPixel = 3;
+const int kBytesPerPixel = 4;
 
 RGBImage::~RGBImage() {
   std::free(rgb);
@@ -50,14 +50,14 @@ HRESULT DecodeFrame::CreateFromVP8Stream(BYTE* vp8_bitstream, DWORD stream_size,
   // TODO: Do the decoding on the first call to CopyPixels to be OK with the
   // letter of the documentation. Maybe we could do progressive decoding if the
   // callers request the image in the top to bottom order?
-  pImage->rgb = WebPDecodeBGR(vp8_bitstream, stream_size,
-                              &pImage->width, &pImage->height);
+  pImage->rgb = WebPDecodeBGRA(vp8_bitstream, stream_size,
+                               &pImage->width, &pImage->height);
   pImage->stride = pImage->width * kBytesPerPixel;
   const bool decodedImage = (pImage->rgb != NULL);
 
 #ifdef WEBP_DEBUG_LOGGING
   double time = StopwatchReadAndReset(&stopwatch);
-  TRACE1("Decode (VP8 -> BGR) time: %f\n", time);
+  TRACE1("Decode (VP8 -> BGRA) time: %f\n", time);
 #endif  // WEBP_DEBUG_LOGGING
 
   if (!decodedImage) {
@@ -114,7 +114,7 @@ HRESULT DecodeFrame::GetPixelFormat(WICPixelFormatGUID *pPixelFormat) {
   TRACE1("(%p)\n", pPixelFormat);
   if (pPixelFormat == NULL)
     return E_INVALIDARG;
-  *pPixelFormat = GUID_WICPixelFormat24bppBGR;
+  *pPixelFormat = GUID_WICPixelFormat32bppBGRA;
   return S_OK;
 }
 

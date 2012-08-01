@@ -12,12 +12,10 @@
 #include <windows.h>
 #include "decode_frame.h"
 
-#include <cassert>
 #include <cstdlib>
 #include <memory>
 
 #include "webp/decode.h"
-#include "webpimg.h"
 
 #ifdef WEBP_DEBUG_LOGGING
 #include "stopwatch.h"
@@ -27,41 +25,6 @@ const int kBytesPerPixel = 3;
 
 RGBImage::~RGBImage() {
   std::free(rgb);
-}
-
-static void YUV420toRGB24Line(const BYTE* y_src,
-                              const BYTE* u_src,
-                              const BYTE* v_src,
-                              int x_start,
-                              int x_end,
-                              BYTE* rgb_dst) {
-  assert(x_start != x_end);
-  y_src += x_start;
-  u_src += x_start/2;
-  v_src += x_start/2;
-  if (x_start & 1) {
-    WebpToRGB24(y_src[0], u_src[0], v_src[0], rgb_dst);
-    rgb_dst += 3;
-    ++u_src;
-    ++v_src;
-    ++y_src;
-    x_start++;
-  }
-  int i;
-  int len = (x_end - x_start)/2;
-  for (i = 0; i < len; ++i) {
-    const int U = u_src[0];
-    const int V = v_src[0];
-    WebpToRGB24(y_src[0], U, V, rgb_dst);
-    WebpToRGB24(y_src[1], U, V, rgb_dst + 3);
-    ++u_src;
-    ++v_src;
-    y_src += 2;
-    rgb_dst += 6;
-  }
-  if (x_end & 1) {      /* Rightmost pixel */
-    WebpToRGB24(y_src[0], (*u_src), (*v_src), rgb_dst);
-  }
 }
 
 HRESULT DecodeFrame::CreateFromVP8Stream(BYTE* vp8_bitstream, DWORD stream_size, ComPtr<DecodeFrame>* ppOutput) {

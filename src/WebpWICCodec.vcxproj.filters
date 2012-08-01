@@ -24,14 +24,8 @@
     <ClCompile Include="decode_frame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="webpimg.cc">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="webpimg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="decode_frame.h">
       <Filter>Header Files</Filter>
     </ClInclude>

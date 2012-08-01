@@ -23,7 +23,6 @@
 #include <unknwn.h>
 #include "decode_container.h"
 #include "utils.h"
-#include "webpimg.h"
 
 #include "uuid.h"
 
@@ -268,7 +267,6 @@ BOOL WINAPI DllMain(__in  HINSTANCE hinstDLL, __in  DWORD fdwReason, __in  LPVOI
   if (fdwReason == DLL_PROCESS_ATTACH) {
     DisableThreadLibraryCalls(hinstDLL);
     MAIN_hSelf = hinstDLL;
-    WebpInitTables();
 #ifdef WEBP_DEBUG_LOGGING
     init_logging();
 #endif

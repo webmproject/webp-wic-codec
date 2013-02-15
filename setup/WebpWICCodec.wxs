@@ -55,7 +55,7 @@
               <File Id='Codec32DLL' Name='WebpWICCodec.dll' DiskId='1' Source='..\bin\win32\Release\WebpWICCodec.dll' KeyPath='yes' SelfRegCost='1'/>
           </Component>
 
-          <Component Id='WebPAssoc' Guid='47366188-2254-42B1-B04A-DB4D377431C1'>
+          <Component Id='WebPAssoc32' Guid='47366188-2254-42B1-B04A-DB4D377431C1'>
             <Condition>VersionNT &gt;= 600</Condition>
             <ProgId Id="webpfile" Description="WebP Image" />
             <RegistryValue Root="HKCR" Key=".webp" Value="webpfile" Type="string" Action="write" />
@@ -65,11 +65,7 @@
             <RegistryValue Root="HKCR" Key=".webp\OpenWithProgids" Name="webpfile" Value="" Type="string" Action="write" />
             <RegistryValue Root="HKCR" Key=".webp\ShellEx\ContextMenuHandlers\ShellImagePreview" Value="{FFE2A43C-56B9-4bf5-9A79-CC6D4285608A}" Type="string" Action="write" />
             <RegistryValue Root="HKCR" Key=".webp\ShellEx\{e357fccd-a995-4576-b01f-234630154e96}" Value="{C7657C4A-9F68-40fa-A4DF-96BC08EB3551}" Type="string" Action="write" />
-<?if $(var.webp_target) = "x64"?>
-            <RegistryValue Root="HKCR" Key="webpfile" Name="FriendlyTypeName" Value="@[#Codec64DLL],-1025" Type="string" Action="write" />
-<?else?>
             <RegistryValue Root="HKCR" Key="webpfile" Name="FriendlyTypeName" Value="@[#Codec32DLL],-1025" Type="string" Action="write" />
-<?endif?>
             <RegistryValue Root="HKCR" Key="webpfile\DefaultIcon" Value="%SystemRoot%\System32\imageres.dll,-72" Type="expandable" Action="write" />
             <RegistryValue Root="HKCR" Key="webpfile\shell\open\command" Value="%SystemRoot%\System32\rundll32.exe &quot;%ProgramFiles%\[WindowsPhotoDir]\PhotoViewer.dll&quot;, ImageView_Fullscreen %1" Type="expandable" Action="write" />
             <RegistryValue Root="HKCR" Key="webpfile\shell\open" Name="MuiVerb" Value="@%ProgramFiles%\[WindowsPhotoDir]\photoviewer.dll,-3043" Type="expandable" Action="write" />
@@ -85,6 +81,24 @@
           <Component Id='Codec64' Guid='5716BBE0-2ACC-4329-877E-C040EB68682C' Win64='yes'>
             <File Id='Codec64DLL' Name='WebpWICCodec.dll' DiskId='1' Source='..\bin\x64\Release\WebpWICCodec.dll' KeyPath='yes' SelfRegCost='1'/>
           </Component>
+
+          <Component Id='WebPAssoc64' Guid='47366188-2254-42B1-B04A-DB4D377431C2' Win64='yes'>
+            <Condition>VersionNT &gt;= 600</Condition>
+            <ProgId Id="webpfile" Description="WebP Image" />
+            <RegistryValue Root="HKCR" Key=".webp" Value="webpfile" Type="string" Action="write" />
+            <RegistryValue Root="HKCR" Key=".webp" Name="Content Type" Value="image/webp" Type="string" Action="write" />
+            <RegistryValue Root="HKCR" Key=".webp" Name="PerceivedType" Value="image" Type="string" Action="write" />
+            <RegistryValue Root="HKCR" Key=".webp\OpenWithList\PhotoViewer.dll" Value="" Type="string" Action="write" />
+            <RegistryValue Root="HKCR" Key=".webp\OpenWithProgids" Name="webpfile" Value="" Type="string" Action="write" />
+            <RegistryValue Root="HKCR" Key=".webp\ShellEx\ContextMenuHandlers\ShellImagePreview" Value="{FFE2A43C-56B9-4bf5-9A79-CC6D4285608A}" Type="string" Action="write" />
+            <RegistryValue Root="HKCR" Key=".webp\ShellEx\{e357fccd-a995-4576-b01f-234630154e96}" Value="{C7657C4A-9F68-40fa-A4DF-96BC08EB3551}" Type="string" Action="write" />
+            <RegistryValue Root="HKCR" Key="webpfile" Name="FriendlyTypeName" Value="@[#Codec64DLL],-1025" Type="string" Action="write" />
+            <RegistryValue Root="HKCR" Key="webpfile\DefaultIcon" Value="%SystemRoot%\System32\imageres.dll,-72" Type="expandable" Action="write" />
+            <RegistryValue Root="HKCR" Key="webpfile\shell\open\command" Value="%SystemRoot%\System32\rundll32.exe &quot;%ProgramFiles%\[WindowsPhotoDir]\PhotoViewer.dll&quot;, ImageView_Fullscreen %1" Type="expandable" Action="write" />
+            <RegistryValue Root="HKCR" Key="webpfile\shell\open" Name="MuiVerb" Value="@%ProgramFiles%\[WindowsPhotoDir]\photoviewer.dll,-3043" Type="expandable" Action="write" />
+            <RegistryValue Root="HKCR" Key="webpfile\shell\printto\command" Value="%SystemRoot%\System32\rundll32.exe %SystemRoot%\System32\shimgvw.dll, ImageView_PrintTo /pt %1 %2 %3 %4" Type="expandable" Action="write" />
+            <RegistryValue Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\PropertySystem\PropertyHandlers\.webp" Value="{780cc6c8-1ca9-4e59-8225-c0f69e3ed512}" Type="string" Action="write" />
+          </Component>
         </Directory>
       </Directory>
 <?endif?>
@@ -97,14 +111,15 @@
           AllowAdvertise='no' ConfigurableDirectory='INSTALLDIR64'>
         <ComponentRef Id='Codec64'/>
         <ComponentRef Id='Codec32'/>
-        <ComponentRef Id='WebPAssoc'/>
+        <ComponentRef Id='WebPAssoc32'/>
+        <ComponentRef Id='WebPAssoc64'/>
       </Feature>
 <?else?>
       <Feature Id='codec_x86' Title='WebP Codec (32-bit)'
           Description='Codec library that allows to display WebP images in applications using the Windows Imaging Component (32-bit)' Level='1'
           AllowAdvertise='no' ConfigurableDirectory='INSTALLDIR'>
         <ComponentRef Id='Codec32'/>
-        <ComponentRef Id='WebPAssoc'/>
+        <ComponentRef Id='WebPAssoc32'/>
       </Feature>
 <?endif?>
       <Feature Id='samples' Title='Sample Images' Description='A sample image in Jpeg and WebP' Level='1' AllowAdvertise='no'

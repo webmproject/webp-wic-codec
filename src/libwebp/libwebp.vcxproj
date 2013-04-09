@@ -35,9 +35,11 @@
     <ClCompile Include="dsp\dec_neon.c" />
     <ClCompile Include="dsp\dec_sse2.c" />
     <ClCompile Include="dsp\enc.c" />
+    <ClCompile Include="dsp\enc_neon.c" />
     <ClCompile Include="dsp\enc_sse2.c" />
     <ClCompile Include="dsp\lossless.c" />
     <ClCompile Include="dsp\upsampling.c" />
+    <ClCompile Include="dsp\upsampling_neon.c" />
     <ClCompile Include="dsp\upsampling_sse2.c" />
     <ClCompile Include="dsp\yuv.c" />
     <ClCompile Include="enc\alpha.c" />
@@ -53,6 +55,7 @@
     <ClCompile Include="enc\picture.c" />
     <ClCompile Include="enc\quant.c" />
     <ClCompile Include="enc\syntax.c" />
+    <ClCompile Include="enc\token.c" />
     <ClCompile Include="enc\tree.c" />
     <ClCompile Include="enc\vp8l.c" />
     <ClCompile Include="enc\webpenc.c" />
@@ -63,6 +66,7 @@
     <ClCompile Include="utils\huffman.c" />
     <ClCompile Include="utils\huffman_encode.c" />
     <ClCompile Include="utils\quant_levels.c" />
+    <ClCompile Include="utils\quant_levels_dec.c" />
     <ClCompile Include="utils\rescaler.c" />
     <ClCompile Include="utils\thread.c" />
     <ClCompile Include="utils\utils.c" />
@@ -87,13 +91,16 @@
     <ClInclude Include="utils\huffman.h" />
     <ClInclude Include="utils\huffman_encode.h" />
     <ClInclude Include="utils\quant_levels.h" />
+    <ClInclude Include="utils\quant_levels_dec.h" />
     <ClInclude Include="utils\rescaler.h" />
     <ClInclude Include="utils\thread.h" />
     <ClInclude Include="utils\utils.h" />
     <ClInclude Include="webp\decode.h" />
+    <ClInclude Include="webp\demux.h" />
     <ClInclude Include="webp\encode.h" />
     <ClInclude Include="webp\format_constants.h" />
     <ClInclude Include="webp\mux.h" />
+    <ClInclude Include="webp\mux_types.h" />
     <ClInclude Include="webp\types.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

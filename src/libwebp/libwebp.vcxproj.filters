@@ -173,6 +173,18 @@
     <ClCompile Include="utils\utils.c">
       <Filter>Source Files\utils</Filter>
     </ClCompile>
+    <ClCompile Include="utils\quant_levels_dec.c">
+      <Filter>Source Files\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="enc\token.c">
+      <Filter>Source Files\enc</Filter>
+    </ClCompile>
+    <ClCompile Include="dsp\enc_neon.c">
+      <Filter>Source Files\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="dsp\upsampling_neon.c">
+      <Filter>Source Files\dsp</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dec\decode_vp8.h">
@@ -254,6 +266,15 @@
       <Filter>Source Files\webp</Filter>
     </ClInclude>
     <ClInclude Include="utils\utils.h">
+      <Filter>Source Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="webp\demux.h">
+      <Filter>Source Files\webp</Filter>
+    </ClInclude>
+    <ClInclude Include="webp\mux_types.h">
+      <Filter>Source Files\webp</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\quant_levels_dec.h">
       <Filter>Source Files\utils</Filter>
     </ClInclude>
   </ItemGroup>

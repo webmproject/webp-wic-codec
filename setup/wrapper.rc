@@ -41,7 +41,7 @@ BEGIN
       VALUE "FileDescription",  "Setup program for " PRODUCT_NAME
       VALUE "FileVersion",      PRODUCT_VERSION_MAJOR_STR "." PRODUCT_VERSION_MINOR_STR "." PRODUCT_VERSION_BUILD_STR ".0"
       VALUE "InternalName",     "WebpWICCodec.dll"
-      VALUE "LegalCopyright",   "Copyright (c) 2010, Google Inc. All rights reserved."
+      VALUE "LegalCopyright",   "Copyright (c) 2013, Google Inc. All rights reserved."
       VALUE "OriginalFilename", "WebpWICCodecSetup.exe"
       VALUE "ProductName",      PRODUCT_NAME
       VALUE "ProductVersion",   PRODUCT_VERSION_MAJOR_STR "." PRODUCT_VERSION_MINOR_STR "." PRODUCT_VERSION_BUILD_STR ".0"
